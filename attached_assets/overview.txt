@@ -1,0 +1,317 @@
+Certainly! Based on your detailed responses, I've compiled a comprehensive description of the requirements for your word game app. This will serve as a blueprint for the development process and ensure that all aspects of the game are well-defined.
+
+---
+
+## **App Overview**
+
+The word game is a team-based activity designed for 1 to 4 teams. Teams compete over three rounds, taking turns to guess words described by one of their teammates within a 60-second time limit. Points are awarded for correctly guessed words and deducted for certain skipped words. The team with the highest cumulative score at the end of the game wins.
+
+---
+
+## **Detailed Requirements**
+
+### **1. Game Structure**
+
+#### **1.1. Game**
+
+- **Definition**: A full gameplay session consisting of three rounds.
+- **Objective**: Teams compete to earn the highest total score over three rounds.
+
+#### **1.2. Round**
+
+- **Definition**: A cycle where each team takes one turn.
+- **Total Rounds**: Three rounds per game.
+
+#### **1.3. Turn**
+
+- **Definition**: A single team's active gameplay period.
+- **Duration**: 60 seconds per turn.
+- **Flow**:
+  - A team member (the describer) views a word and describes it to their teammates.
+  - Teammates attempt to guess the word based on the description.
+  - The describer uses "Next" to confirm correct guesses or "Skip" to move past difficult words.
+
+---
+
+### **2. Gameplay Mechanics**
+
+#### **2.1. Word Presentation**
+
+- **Visibility**: Displayed on-screen, visible only to the describer.
+- **Selection**:
+  - Words are randomly selected from a randomly chosen category for each turn.
+  - Words appear in a random order within the category.
+  - Previously used words are excluded from future turns within the same game.
+
+#### **2.2. Categories**
+
+- **Available Categories**:
+  - Action
+  - Category
+  - Nature
+  - Person
+  - Random (includes words from all other categories)
+  - World
+- **Selection**:
+  - Categories are randomly selected at the beginning of each turn.
+  - Option to exclude specific categories before the game starts.
+
+#### **2.3. Describing and Guessing**
+
+- **Describer**:
+  - Looks at the word displayed on-screen.
+  - Provides verbal clues without saying the word or using direct synonyms.
+- **Team**:
+  - Listens to the clues and attempts to guess the word.
+- **Controls**:
+  - **Next**:
+    - Used by the describer when the team guesses the word correctly.
+    - Awards +1 point.
+  - **Skip**:
+    - Used to pass difficult words.
+    - The first skip per turn has no penalty.
+    - Each subsequent skip deducts -1 point.
+    - No limit on the number of skips per turn.
+
+---
+
+### **3. Scoring System**
+
+#### **3.1. Points Allocation**
+
+- **Correct Guess (Next)**: +1 point.
+- **First Skip**: No penalty.
+- **Subsequent Skips**: -1 point per skip.
+- **Incorrect Guesses**: No penalty (only time is expended).
+
+#### **3.2. Score Tracking**
+
+- **Per Turn**: Points are tallied and displayed at the end of each turn.
+- **Cumulative**: Points accumulate over the three rounds.
+- **Leaderboard**: Displayed after each round showing all teams' scores.
+
+#### **3.3. Winning the Game**
+
+- **Determination**: The team with the highest total score after three rounds wins.
+- **Tie**: If teams tie, they share the victory (no tie-breaker rounds).
+
+---
+
+### **4. Team Setup**
+
+#### **4.1. Number of Teams**
+
+- **Supported Teams**: 1 to 4 teams.
+- **Single-Team Mode**: Allows for practice sessions or casual play.
+
+#### **4.2. Team Naming**
+
+- **Customization**:
+  - At the start of the game, users are prompted to enter team names.
+  - Input screen should allow easy entry of team names.
+- **Default Names**:
+  - If no name is entered, assign default names (e.g., Team 1, Team 2).
+
+---
+
+### **5. User Interface and Experience**
+
+#### **5.1. General Design**
+
+- **Visuals**:
+  - Clean, intuitive layout suitable for mobile devices.
+  - Incorporate animations to enhance engagement.
+- **Sound Effects**:
+  - Include audible cues (dings, alerts) to signal time and actions.
+- **Accessibility**:
+  - Follow web accessibility guidelines.
+  - Ensure readable fonts, appropriate contrast, and clear instructions.
+
+#### **5.2. In-Game Screens**
+
+##### **5.2.1. Turn Screen**
+
+- **Timer**:
+  - Prominent display of the 60-second countdown.
+  - Audible ding at 30 seconds remaining.
+  - At 10 seconds remaining:
+    - Timer flashes or changes color (e.g., from green to red).
+- **Word Display**:
+  - The current word shown only to the describer.
+- **Word List Display**:
+  - Visible list of guessed and skipped words during the turn.
+- **Controls**:
+  - **Next Button**: Advances to the next word, logs as correct.
+  - **Skip Button**: Advances to the next word, logs as skipped.
+
+##### **5.2.2. End of Turn Summary**
+
+- **Display**:
+  - List of correctly guessed words.
+  - List of skipped words.
+  - Points earned during the turn.
+- **Navigation**:
+  - Prompt indicating it's the next team's turn.
+  - "Start Next Turn" button to proceed.
+
+##### **5.2.3. Leaderboard Screen**
+
+- **After Each Round**:
+  - Displays cumulative scores for all teams.
+  - Ranks teams based on total points.
+- **Design**:
+  - Clear presentation of team names and scores.
+  - Option to continue to the next round.
+
+#### **5.3. Starting a Game**
+
+- **Team Setup Screen**:
+  - Input fields for team names.
+  - Selection of the number of teams.
+- **Category Exclusion**:
+  - Option to deselect categories to be excluded from the game.
+- **Instructions and Settings**:
+  - Accessible help section explaining game rules.
+  - Settings menu to adjust game preferences.
+
+#### **5.4. End of Game**
+
+- **Final Scores**:
+  - Displayed upon completion of the third round.
+  - Highlight the winning team(s).
+- **Play Again Option**:
+  - Prompt to start a new game or return to the main menu.
+
+---
+
+### **6. Technical Specifications**
+
+#### **6.1. Platform**
+
+- **Type**: Web application.
+- **Target Devices**: Mobile devices (responsive design for various screen sizes).
+- **Browser Compatibility**: Ensure functionality across major mobile browsers.
+
+#### **6.2. Technology Stack**
+
+- **Languages**:
+  - TypeScript and/or JavaScript.
+- **Frameworks/Libraries**:
+  - Optional use of frameworks like React, Vue.js, or Angular for enhanced development.
+- **Version Control**:
+  - Use Git for tracking changes and collaboration.
+
+#### **6.3. Data Management**
+
+- **Word Lists**:
+  - Stored locally within the app.
+  - Data structured to easily access words by category.
+- **Game State**:
+  - No need for data persistence between sessions.
+  - Game state managed in-memory during play.
+
+#### **6.4. Performance and Optimization**
+
+- **Loading Times**:
+  - Efficient loading of word lists and assets.
+- **Animations and Effects**:
+  - Optimized for smooth performance on mobile devices.
+
+---
+
+### **7. Additional Features**
+
+#### **7.1. Instructions Section**
+
+- **Content**:
+  - Clear, step-by-step guide on how to play the game.
+  - Explanation of controls, scoring, and game flow.
+- **Accessibility**:
+  - Easily accessible from the main menu and during the game.
+
+#### **7.2. Settings Menu**
+
+- **Adjustable Settings**:
+  - Ability to exclude specific categories before starting a game.
+  - Potential to adjust turn duration (e.g., 30, 60, 90 seconds).
+- **Sound Toggle**:
+  - Option to enable or disable sound effects.
+
+#### **7.3. Random Category**
+
+- **Functionality**:
+  - When selected, the Random category pulls words from all other categories.
+- **Selection**:
+  - Treated as a regular category during random category selection for turns.
+
+---
+
+## **Next Steps**
+
+With the requirements clearly defined, we can proceed to the programming phase. Here’s how we can move forward:
+
+### **1. Project Setup**
+
+- **Development Environment**:
+  - Set up a development environment with your chosen framework (if any).
+- **Repository Initialization**:
+  - Initialize a Git repository to manage code versions.
+
+### **2. UI/UX Design**
+
+- **Wireframes and Mockups**:
+  - Create visual designs for each screen based on the UI requirements.
+- **User Flow Diagrams**:
+  - Map out the navigation between different screens and game states.
+
+### **3. Implementing the App**
+
+#### **3.1. Structure and Navigation**
+
+- Create the main screens: Main Menu, Team Setup, Game Play, Turn Summary, Leaderboard, Settings, and Instructions.
+- Implement navigation between screens.
+
+#### **3.2. Game Logic**
+
+- **Word and Category Management**:
+  - Implement functions to select random categories and words, ensuring no repetition within a game.
+- **Turn and Timer Functionality**:
+  - Develop the countdown timer with visual and audible cues.
+  - Handle the progression of turns and rounds.
+- **Scoring System**:
+  - Implement point allocation logic based on correct guesses and skips.
+  - Keep track of cumulative scores.
+
+#### **3.3. User Interface Components**
+
+- **Interactive Elements**:
+  - Build buttons for "Next" and "Skip" with appropriate event handlers.
+- **Display Elements**:
+  - Design the timer, word display, and lists for guessed and skipped words.
+- **Animations and Effects**:
+  - Integrate animations for transitions and feedback (e.g., button presses, timer alerts).
+
+#### **3.4. Accessibility Compliance**
+
+- **Testing for Accessibility**:
+  - Ensure the app meets web accessibility standards (e.g., WCAG).
+- **Responsive Design**:
+  - Optimize layouts for various mobile screen sizes.
+
+### **4. Testing**
+
+- **Unit Testing**:
+  - Write tests for game logic functions to ensure reliability.
+- **User Testing**:
+  - Conduct testing sessions to gather feedback on usability and enjoyment.
+- **Cross-Browser Testing**:
+  - Verify functionality across different mobile browsers (Chrome, Safari, Firefox).
+
+### **5. Deployment**
+
+- **Hosting Setup**:
+  - Choose a hosting platform suitable for web apps (e.g., Netlify, GitHub Pages).
+- **Deployment Pipeline**:
+  - Automate build and deployment processes if possible.
+- **Performance Monitoring**:
+  - Set up tools to monitor app performance and errors.
