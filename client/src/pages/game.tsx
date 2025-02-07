@@ -9,6 +9,7 @@ import { getRandomWord, getRandomCategory } from "@/lib/game-data";
 import { WordResult, Category } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
 import useSound from "use-sound";
 import { QuitGameDialog } from "@/components/quit-game-dialog";
 
@@ -23,7 +24,8 @@ export default function Game() {
     nextTeam,
     addTurnResult,
     currentRound,
-    totalRounds
+    totalRounds,
+    isGameStarted
   } = useGameStore();
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
@@ -39,6 +41,21 @@ export default function Game() {
   const [playCorrectSound] = useSound('/correct.mp3', { volume: 0.5 });
   const [playSkipSound] = useSound('/skip.mp3', { volume: 0.5 });
 
+  // Redirect if game not started
+  useEffect(() => {
+    if (!isGameStarted) {
+      navigate("/");
+      return;
+    }
+  }, [isGameStarted, navigate]);
+
+  // Initialize game state
+  useEffect(() => {
+    if (teams.length && currentWord === "") {
+      setCurrentWord(getRandomWord(currentCategory, usedWords));
+    }
+  }, [teams, currentWord, currentCategory, usedWords]);
+
   // Timer sound effect
   useEffect(() => {
     if (timer.timeLeft === 5 && timer.isActive) {
@@ -50,13 +67,17 @@ export default function Game() {
     }
   }, [timer.timeLeft, playTimerSound, timer.isActive]);
 
-  useEffect(() => {
-    if (!teams.length) {
-      navigate("/");
-      return;
-    }
-    setCurrentWord(getRandomWord(currentCategory, usedWords));
-  }, []);
+  // Loading state
+  if (!teams.length || !isGameStarted) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          <span>Loading game...</span>
+        </div>
+      </div>
+    );
+  }
 
   const getCurrentScore = () => {
     const correctWords = results.filter(r => r.correct);
@@ -136,13 +157,7 @@ export default function Game() {
       <div className="flex-1 overflow-y-auto p-6 pb-96 space-y-6">
         <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
-        <WordDisplay
-          word={currentWord}
-          category={currentCategory}
-          onNext={handleNext}
-          onSkip={handleSkip}
-          disabled={timer.isFinished}
-        />
+        <WordDisplay word={currentWord} category={currentCategory} />
 
         <div className="space-y-4">
           <Card className="p-4">
