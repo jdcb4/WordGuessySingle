@@ -47,17 +47,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const nextIndex = (state.currentTeamIndex + 1) % state.teams.length;
     const isRoundComplete = nextIndex === 0;
 
-    // Game is over when we've completed round 3 (all teams have had 3 turns)
-    const isLastTurn = state.currentRound === 3 && state.currentTeamIndex === state.teams.length - 1;
+    // Check if current team is completing their third round
+    const isLastRound = state.currentRound === 3;
+    const isLastTeam = state.currentTeamIndex === state.teams.length - 1;
+    const isGameOver = isLastRound && isLastTeam;
 
-    if (isLastTurn) {
+    if (isGameOver) {
       return {
-        isGameOver: true,
-        currentTeamIndex: state.currentTeamIndex,
-        currentRound: state.currentRound
+        isGameOver: true
       };
     }
 
+    // If it's not game over, move to next team or round
     return {
       currentTeamIndex: nextIndex,
       currentRound: isRoundComplete ? state.currentRound + 1 : state.currentRound,
