@@ -41,7 +41,7 @@ export function useWebSocket(gameId?: string) {
             case 'player_joined': {
               toast({
                 title: "Player joined",
-                description: "A new player has joined the game.",
+                description: `${message.payload.teamName} has joined the game.`,
               });
               break;
             }
@@ -72,7 +72,8 @@ export function useWebSocket(gameId?: string) {
         setConnected(false);
         setSocket(null);
 
-        if (!event.wasClean && reconnectAttempts < 3) {
+        // Only attempt reconnection if it wasn't a clean close and we're still on the same game
+        if (!event.wasClean && reconnectAttempts < 3 && gameId) {
           const timeout = Math.min(1000 * Math.pow(2, reconnectAttempts), 5000);
           console.log(`Attempting reconnect in ${timeout}ms`);
 
@@ -80,6 +81,11 @@ export function useWebSocket(gameId?: string) {
             setReconnectAttempts(prev => prev + 1);
             connect();
           }, timeout);
+
+          toast({
+            title: "Connection Lost",
+            description: "Attempting to reconnect...",
+          });
         }
       };
 
@@ -94,9 +100,10 @@ export function useWebSocket(gameId?: string) {
 
       setSocket(ws);
 
+      // Return cleanup function
       return () => {
         if (ws.readyState === WebSocket.OPEN) {
-          ws.close();
+          ws.close(1000, "Clean disconnect");
         }
       };
     } catch (error) {
@@ -106,10 +113,13 @@ export function useWebSocket(gameId?: string) {
     }
   }, [gameId, reconnectAttempts, updateGameState, toast]);
 
+  // Only connect when we have a gameId
   useEffect(() => {
-    const cleanup = connect();
-    return () => cleanup?.();
-  }, [connect]);
+    if (gameId) {
+      const cleanup = connect();
+      return () => cleanup?.();
+    }
+  }, [connect, gameId]);
 
   const sendMessage = useCallback((message: WSMessage) => {
     if (socket?.readyState === WebSocket.OPEN) {

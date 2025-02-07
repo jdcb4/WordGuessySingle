@@ -25,15 +25,21 @@ export default function Online() {
     if (!teamName) return;
     setIsConnecting(true);
 
-    // Initialize game state and send join message
-    initializeGame([{ id: 1, name: teamName, score: 0, roundScores: [], isHost: true }], [], 30, 3, 'online');
+    // Initialize game state
+    initializeGame(
+      [{ id: 1, name: teamName, score: 0, roundScores: [], isHost: true }],
+      [],
+      30,
+      3,
+      'online'
+    );
 
     // Send join message as host
     sendMessage({
       type: 'join_game',
       payload: {
         gameId: hostGameId,
-        teamName
+        teamName,
       }
     });
 
@@ -45,6 +51,7 @@ export default function Online() {
     if (!teamName || !gameCode) return;
     setIsConnecting(true);
 
+    // Send join message
     sendMessage({
       type: 'join_game',
       payload: {
@@ -139,7 +146,7 @@ export default function Online() {
                   size="lg"
                   className="w-full relative"
                   onClick={handleJoin}
-                  disabled={!teamName || !gameCode || isConnecting}
+                  disabled={!teamName || !gameCode || isConnecting || !connected}
                 >
                   {isConnecting ? (
                     <>

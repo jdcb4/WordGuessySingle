@@ -31,9 +31,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   initializeGame: (teams, excludedCategories, turnDuration, totalRounds, gameMode = 'local') => {
-    const currentState = get();
     set({
-      ...currentState,
       teams,
       excludedCategories,
       turnDuration,
@@ -41,7 +39,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isGameStarted: true,
       currentRound: 1,
       currentTeamIndex: 0,
-      gameMode
+      gameMode,
+      isGameOver: false
     });
   },
 
@@ -102,7 +101,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   isHost: () => {
     const state = get();
-    return state.hostId === state.gameId;
+    return state.gameMode === 'local' || state.hostId === state.gameId;
   },
 
   reset: () => set(initialState)

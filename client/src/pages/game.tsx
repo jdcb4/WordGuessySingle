@@ -29,7 +29,7 @@ export default function Game() {
     isGameStarted,
     gameId,
     isHost,
-    gameMode // Added gameMode
+    gameMode
   } = useGameStore();
   const { connected, sendMessage } = useWebSocket(gameId);
 
@@ -46,7 +46,7 @@ export default function Game() {
   const [playCorrectSound] = useSound('/correct.mp3', { volume: 0.5 });
   const [playSkipSound] = useSound('/skip.mp3', { volume: 0.5 });
 
-  // Redirect if game not started
+  // Redirect if game not started or connection lost in online mode
   useEffect(() => {
     if (!isGameStarted || (gameMode === 'online' && !connected)) {
       navigate("/");
@@ -120,15 +120,17 @@ export default function Game() {
       words: results
     };
 
-    // Send turn result to all players
-    sendMessage({
-      type: 'end_turn',
-      payload: {
-        turnResult,
-        nextTeamIndex: (currentTeamIndex + 1) % teams.length,
-        currentRound: currentRound + ((currentTeamIndex + 1) === teams.length ? 1 : 0)
-      }
-    });
+    // Send turn result to all players in online mode
+    if (gameMode === 'online') {
+      sendMessage({
+        type: 'end_turn',
+        payload: {
+          turnResult,
+          nextTeamIndex: (currentTeamIndex + 1) % teams.length,
+          currentRound: currentRound + ((currentTeamIndex + 1) === teams.length ? 1 : 0)
+        }
+      });
+    }
 
     addTurnResult(turnResult);
 
@@ -150,10 +152,12 @@ export default function Game() {
     }
   };
 
-  // Only the current team's turn should be interactive
-  const isCurrentTeamsTurn = 
-    gameMode === 'local' || 
-    isHost() || teams[currentTeamIndex].id === teams[currentTeamIndex]?.id;
+  // Check if it's the current team's turn and they can interact
+  const isCurrentTeamsTurn =
+    gameMode === 'local' ||
+    (teams[currentTeamIndex] &&
+      ((isHost() && teams[currentTeamIndex].isHost) ||
+        (!isHost() && !teams[currentTeamIndex].isHost)));
 
   if (!timer.isActive && !timer.isFinished) {
     return (
@@ -169,10 +173,12 @@ export default function Game() {
             <Button size="lg" onClick={() => {
               timer.start();
               // Notify other players that the turn has started
-              sendMessage({
-                type: 'turn_started',
-                payload: { teamId: teams[currentTeamIndex].id }
-              });
+              if (gameMode === 'online') {
+                sendMessage({
+                  type: 'turn_started',
+                  payload: { teamId: teams[currentTeamIndex].id }
+                });
+              }
             }}>
               Start Turn
             </Button>
