@@ -38,7 +38,7 @@ export default function Game() {
   const [playSkipSound] = useSound('/skip.mp3', { volume: 0.5 });
 
   useEffect(() => {
-    if (timer.timeLeft <= 10 && timer.timeLeft > 0) {
+    if (timer.timeLeft <= 5 && timer.timeLeft > 0) {
       playTimerSound();
     }
   }, [timer.timeLeft, playTimerSound]);

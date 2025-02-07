@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { GameState, Team, TurnResult, WordResult } from '@shared/schema';
 
 interface GameStore extends GameState {
-  initializeGame: (teams: Team[], excludedCategories: string[], turnDuration: number) => void;
+  initializeGame: (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number) => void;
   updateTeamScore: (teamId: number, points: number) => void;
   nextTeam: () => void;
   nextRound: () => void;
@@ -14,20 +14,22 @@ interface GameStore extends GameState {
 const initialState: GameState = {
   teams: [],
   currentRound: 1,
+  totalRounds: 3,
   currentTeamIndex: 0,
   excludedCategories: [],
   isGameStarted: false,
   isGameOver: false,
-  turnDuration: 60
+  turnDuration: 30
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  initializeGame: (teams, excludedCategories, turnDuration) => set({
+  initializeGame: (teams, excludedCategories, turnDuration, totalRounds) => set({
     teams,
     excludedCategories,
     turnDuration,
+    totalRounds,
     isGameStarted: true,
     currentRound: 1,
     currentTeamIndex: 0
@@ -45,7 +47,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   nextTeam: () => set(state => {
     // Check if we're at the end of the game
-    const isLastRound = state.currentRound === 3;
+    const isLastRound = state.currentRound === state.totalRounds;
     const isLastTeam = state.currentTeamIndex === state.teams.length - 1;
 
     if (isLastRound && isLastTeam) {
