@@ -116,7 +116,7 @@ export function useWebSocket(gameId?: string) {
       console.error('Error creating WebSocket:', error);
       setConnected(false);
     }
-  }, [gameId, reconnectAttempts, updateGameState]);
+  }, [gameId, reconnectAttempts, updateGameState, toast]);
 
   // Initial connection
   useEffect(() => {
@@ -146,7 +146,7 @@ export function useWebSocket(gameId?: string) {
         variant: "destructive",
       });
     }
-  }, [socket]);
+  }, [socket, toast]);
 
   return {
     connected,

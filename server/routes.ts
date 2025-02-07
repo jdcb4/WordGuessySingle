@@ -104,30 +104,29 @@ export function registerRoutes(app: Express): Server {
               gameId = requestedGameId || nanoid();
               console.log('Creating new game:', gameId);
 
+              const newState: GameState = {
+                gameId,
+                teams: [],
+                currentRound: 1,
+                totalRounds: 3,
+                currentTeamIndex: 0,
+                excludedCategories: [],
+                isGameStarted: false,
+                isGameOver: false,
+                turnDuration: 30,
+                hostId: gameId
+              };
+
               gameSessions.set(gameId, {
-                state: {
-                  gameId,
-                  teams: [],
-                  currentRound: 1,
-                  totalRounds: 3,
-                  currentTeamIndex: 0,
-                  excludedCategories: [],
-                  isGameStarted: false,
-                  isGameOver: false,
-                  turnDuration: 30,
-                  hostId: gameId
-                },
+                state: newState,
                 clients: new Set([ws])
               });
 
               // Send initial game state to creator
-              const newSession = gameSessions.get(gameId);
-              if (newSession) {
-                ws.send(JSON.stringify({
-                  type: 'game_state',
-                  payload: newSession.state
-                }));
-              }
+              ws.send(JSON.stringify({
+                type: 'game_state',
+                payload: newState
+              }));
             }
             break;
           }
@@ -181,6 +180,13 @@ export function registerRoutes(app: Express): Server {
               payload: session.state
             });
             break;
+          }
+          default: {
+            console.warn('Unknown message type:', message.type);
+            ws.send(JSON.stringify({
+              type: 'error',
+              payload: { message: 'Unknown message type' }
+            }));
           }
         }
       } catch (error) {
