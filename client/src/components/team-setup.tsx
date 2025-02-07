@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Team, TURN_DURATIONS, ROUND_OPTIONS } from "@shared/schema";
+import { Team, TURN_DURATIONS, ROUND_OPTIONS, TurnDuration } from "@shared/schema";
 import { CategorySelect } from "./category-select";
 
 interface TeamSetupProps {
@@ -14,7 +14,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
   const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
-  const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
+  const [turnDuration, setTurnDuration] = useState<TurnDuration>(30); // Default to 30 seconds
   const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
 
   const handleStart = () => {

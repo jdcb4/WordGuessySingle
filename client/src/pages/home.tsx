@@ -19,6 +19,10 @@ export default function Home() {
 
   // Handle game creation
   const handleStart = (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number) => {
+    // Initialize local game state first
+    initializeGame(teams, excludedCategories, turnDuration, totalRounds);
+
+    // Then broadcast to other players
     sendMessage({
       type: 'start_game',
       payload: {
@@ -28,6 +32,7 @@ export default function Home() {
         totalRounds
       }
     });
+
     navigate("/game");
   };
 
