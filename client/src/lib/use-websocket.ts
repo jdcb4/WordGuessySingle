@@ -16,26 +16,20 @@ export function useWebSocket(gameId?: string) {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws`;
-      console.log('Connecting to WebSocket:', wsUrl, 'for game:', gameId);
+      console.log('Connecting to WebSocket:', wsUrl);
 
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log('WebSocket connected, joining game:', gameId);
+        console.log('WebSocket connected successfully');
         setConnected(true);
         setReconnectAttempts(0);
-
-        // Join game immediately on connection
-        ws.send(JSON.stringify({
-          type: 'join_game',
-          payload: { gameId }
-        }));
       };
 
       ws.onmessage = (event) => {
         try {
           const message: WSMessage = JSON.parse(event.data);
-          console.log('Received WebSocket message:', message.type, message);
+          console.log('Received WebSocket message:', message.type);
 
           switch (message.type) {
             case 'game_state': {
@@ -59,7 +53,7 @@ export function useWebSocket(gameId?: string) {
               break;
             }
             case 'error': {
-              console.error('WebSocket error message:', message.payload);
+              console.error('WebSocket error:', message.payload);
               toast({
                 title: "Error",
                 description: message.payload.message,
@@ -73,86 +67,68 @@ export function useWebSocket(gameId?: string) {
         }
       };
 
-      // Handle disconnection and reconnection
       ws.onclose = (event) => {
         console.log('WebSocket disconnected:', event.code, event.reason);
         setConnected(false);
+        setSocket(null);
 
         if (!event.wasClean && reconnectAttempts < 3) {
           const timeout = Math.min(1000 * Math.pow(2, reconnectAttempts), 5000);
-          console.log(`Attempting reconnect in ${timeout}ms, attempt ${reconnectAttempts + 1}`);
+          console.log(`Attempting reconnect in ${timeout}ms`);
 
           setTimeout(() => {
             setReconnectAttempts(prev => prev + 1);
             connect();
           }, timeout);
-
-          toast({
-            title: "Connection Lost",
-            description: "Attempting to reconnect...",
-            variant: "destructive",
-          });
-        } else if (reconnectAttempts >= 3) {
-          toast({
-            title: "Connection Failed",
-            description: "Unable to connect to game server. Please refresh the page.",
-            variant: "destructive",
-          });
         }
       };
 
       ws.onerror = (error) => {
         console.error('WebSocket error:', error);
-        setConnected(false);
+        toast({
+          title: "Connection Error",
+          description: "Failed to connect to game server",
+          variant: "destructive",
+        });
       };
 
       setSocket(ws);
 
       return () => {
-        console.log('Cleaning up WebSocket connection');
-        ws.close();
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.close();
+        }
       };
     } catch (error) {
       console.error('Error creating WebSocket:', error);
       setConnected(false);
+      setSocket(null);
     }
   }, [gameId, reconnectAttempts, updateGameState, toast]);
 
-  // Initial connection
   useEffect(() => {
-    if (gameId) {
-      console.log('Initializing WebSocket connection for game:', gameId);
-      const cleanup = connect();
-      return () => {
-        console.log('Cleaning up WebSocket connection for game:', gameId);
-        cleanup?.();
-      };
-    }
-  }, [connect, gameId]);
+    const cleanup = connect();
+    return () => cleanup?.();
+  }, [connect]);
 
-  // Send message helper
   const sendMessage = useCallback((message: WSMessage) => {
     if (socket?.readyState === WebSocket.OPEN) {
       try {
-        console.log('Sending WebSocket message:', message.type, message);
+        console.log('Sending WebSocket message:', message.type);
         socket.send(JSON.stringify(message));
       } catch (error) {
         console.error('Error sending message:', error);
         toast({
           title: "Error",
-          description: "Failed to send message to the game server.",
+          description: "Failed to send message",
           variant: "destructive",
         });
       }
     } else {
-      console.warn('WebSocket is not connected, state:', socket?.readyState);
-      toast({
-        title: "Not Connected",
-        description: "Unable to communicate with the game server. Please refresh the page.",
-        variant: "destructive",
-      });
+      console.warn('WebSocket not connected, attempting to reconnect...');
+      connect();
     }
-  }, [socket, toast]);
+  }, [socket, connect, toast]);
 
   return {
     connected,

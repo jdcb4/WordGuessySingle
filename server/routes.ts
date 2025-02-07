@@ -32,7 +32,7 @@ function broadcastToGame(gameId: string, message: WSMessage) {
   });
 }
 
-// Heartbeat unchanged
+// Heartbeat to keep connections alive
 function heartbeat(ws: WebSocket) {
   console.log('Received pong from client');
   (ws as any).isAlive = true;
@@ -40,16 +40,19 @@ function heartbeat(ws: WebSocket) {
 
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
-  const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
+  const wss = new WebSocketServer({ 
+    server: httpServer, 
+    path: '/ws',
+    clientTracking: true
+  });
 
-  // Heartbeat interval setup remains unchanged
+  // Set up heartbeat interval
   const interval = setInterval(() => {
     wss.clients.forEach((ws) => {
       if ((ws as any).isAlive === false) {
         console.log('Terminating inactive client');
         return ws.terminate();
       }
-
       (ws as any).isAlive = false;
       ws.ping();
     });
@@ -85,14 +88,16 @@ export function registerRoutes(app: Express): Server {
                 session.clients.add(ws);
                 console.log('Player joined existing game:', gameId);
 
-                // Add the new team to the game state
-                session.state.teams.push({
-                  id: session.state.teams.length + 1,
-                  name: teamName,
-                  score: 0,
-                  roundScores: [],
-                  isHost: false
-                });
+                // Add the new team to the game state if not host
+                if (!session.state.teams.some(t => t.isHost)) {
+                  session.state.teams.push({
+                    id: session.state.teams.length + 1,
+                    name: teamName,
+                    score: 0,
+                    roundScores: [],
+                    isHost: false
+                  });
+                }
 
                 // Send current game state to new player
                 ws.send(JSON.stringify({
@@ -102,7 +107,7 @@ export function registerRoutes(app: Express): Server {
 
                 // Notify other players that someone joined
                 broadcastToGame(gameId, {
-                  type: 'team_joined',
+                  type: 'player_joined',
                   payload: { teamName }
                 });
               }
