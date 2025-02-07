@@ -72,8 +72,7 @@ export function useWebSocket(gameId?: string) {
         setConnected(false);
         setSocket(null);
 
-        // Only attempt reconnection if it wasn't a clean close and we're still on the same game
-        if (!event.wasClean && reconnectAttempts < 3 && gameId) {
+        if (!event.wasClean && reconnectAttempts < 3) {
           const timeout = Math.min(1000 * Math.pow(2, reconnectAttempts), 5000);
           console.log(`Attempting reconnect in ${timeout}ms`);
 
@@ -99,13 +98,6 @@ export function useWebSocket(gameId?: string) {
       };
 
       setSocket(ws);
-
-      // Return cleanup function
-      return () => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.close(1000, "Clean disconnect");
-        }
-      };
     } catch (error) {
       console.error('Error creating WebSocket:', error);
       setConnected(false);
@@ -113,32 +105,42 @@ export function useWebSocket(gameId?: string) {
     }
   }, [gameId, reconnectAttempts, updateGameState, toast]);
 
-  // Only connect when we have a gameId
   useEffect(() => {
     if (gameId) {
-      const cleanup = connect();
-      return () => cleanup?.();
+      connect();
+    } else {
+      if (socket?.readyState === WebSocket.OPEN) {
+        socket.close(1000, "Clean disconnect");
+      }
+      setSocket(null);
+      setConnected(false);
     }
-  }, [connect, gameId]);
+
+    return () => {
+      if (socket?.readyState === WebSocket.OPEN) {
+        socket.close(1000, "Clean disconnect");
+      }
+    };
+  }, [gameId, socket, connect]);
 
   const sendMessage = useCallback((message: WSMessage) => {
-    if (socket?.readyState === WebSocket.OPEN) {
-      try {
-        console.log('Sending WebSocket message:', message.type);
-        socket.send(JSON.stringify(message));
-      } catch (error) {
-        console.error('Error sending message:', error);
-        toast({
-          title: "Error",
-          description: "Failed to send message",
-          variant: "destructive",
-        });
-      }
-    } else {
-      console.warn('WebSocket not connected, attempting to reconnect...');
-      connect();
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+      console.warn('WebSocket not connected, cannot send message');
+      return;
     }
-  }, [socket, connect, toast]);
+
+    try {
+      console.log('Sending WebSocket message:', message.type);
+      socket.send(JSON.stringify(message));
+    } catch (error) {
+      console.error('Error sending message:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        variant: "destructive",
+      });
+    }
+  }, [socket, toast]);
 
   return {
     connected,

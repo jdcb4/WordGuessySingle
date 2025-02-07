@@ -44,7 +44,7 @@ export default function Online() {
       type: 'join_game',
       payload: {
         gameId: newGameId,
-        teamName,
+        teamName
       }
     });
 
@@ -124,7 +124,7 @@ export default function Online() {
                   onClick={handleHost}
                   disabled={!teamName || (isConnecting && !connected)}
                 >
-                  {isConnecting ? (
+                  {isConnecting && !connected ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Connecting...
@@ -171,7 +171,7 @@ export default function Online() {
                   onClick={handleJoin}
                   disabled={!teamName || !gameCode || (isConnecting && !connected)}
                 >
-                  {isConnecting ? (
+                  {isConnecting && !connected ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Connecting...
