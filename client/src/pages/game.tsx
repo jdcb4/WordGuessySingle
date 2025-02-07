@@ -60,9 +60,8 @@ export default function Game() {
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: true }]);
 
-    const nextCategory = getRandomCategory(excludedCategories);
-    setCurrentCategory(nextCategory);
-    setCurrentWord(getRandomWord(nextCategory, usedWords));
+    // Keep using the same category for the next word
+    setCurrentWord(getRandomWord(currentCategory, usedWords));
   };
 
   const handleSkip = () => {
@@ -71,9 +70,8 @@ export default function Game() {
     setResults([...results, { word: currentWord, category: currentCategory, correct: false }]);
     setSkipsUsed(skipsUsed + 1);
 
-    const nextCategory = getRandomCategory(excludedCategories);
-    setCurrentCategory(nextCategory);
-    setCurrentWord(getRandomWord(nextCategory, usedWords));
+    // Keep using the same category for the next word
+    setCurrentWord(getRandomWord(currentCategory, usedWords));
   };
 
   const handleTurnEnd = () => {
@@ -90,8 +88,12 @@ export default function Game() {
       timer.reset();
       setResults([]);
       setSkipsUsed(0);
-      setCurrentCategory(getRandomCategory(excludedCategories));
-      setCurrentWord(getRandomWord(currentCategory, usedWords));
+      // Select a new category for the next turn
+      const newCategory = getRandomCategory(excludedCategories);
+      setCurrentCategory(newCategory);
+      setCurrentWord(getRandomWord(newCategory, new Set()));
+      // Clear used words for the new turn
+      usedWords.clear();
     }
   };
 
