@@ -15,14 +15,18 @@ export function useWebSocket(gameId?: string) {
       socket.close();
     }
 
+    if (!gameId) return; // Don't connect if no gameId
+
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/ws`;
+
+    console.log('Connecting to WebSocket:', wsUrl);
 
     try {
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log('WebSocket connected');
+        console.log('WebSocket connected, joining game:', gameId);
         setConnected(true);
         // Join or create game
         ws.send(JSON.stringify({
@@ -34,11 +38,12 @@ export function useWebSocket(gameId?: string) {
       ws.onmessage = (event) => {
         try {
           const message: WSMessage = JSON.parse(event.data);
-          console.log('Received message:', message.type);
+          console.log('Received WebSocket message:', message.type);
 
           switch (message.type) {
             case 'game_state': {
               const gameState = message.payload as GameState;
+              console.log('Updating game state:', gameState);
               updateGameState(gameState);
               break;
             }
@@ -57,7 +62,7 @@ export function useWebSocket(gameId?: string) {
               break;
             }
             case 'error': {
-              console.error('WebSocket error:', message.payload);
+              console.error('WebSocket error message:', message.payload);
               toast({
                 title: "Error",
                 description: message.payload.message,
@@ -71,14 +76,16 @@ export function useWebSocket(gameId?: string) {
         }
       };
 
-      ws.onclose = () => {
-        console.log('WebSocket disconnected');
+      ws.onclose = (event) => {
+        console.log('WebSocket disconnected:', event.code, event.reason);
         setConnected(false);
-        toast({
-          title: "Disconnected",
-          description: "Lost connection to the game server.",
-          variant: "destructive",
-        });
+        if (!event.wasClean) {
+          toast({
+            title: "Connection Lost",
+            description: "Lost connection to the game server. Please try again.",
+            variant: "destructive",
+          });
+        }
       };
 
       ws.onerror = (error) => {
@@ -89,6 +96,7 @@ export function useWebSocket(gameId?: string) {
       setSocket(ws);
 
       return () => {
+        console.log('Cleaning up WebSocket connection');
         ws.close();
       };
     } catch (error) {
@@ -100,6 +108,7 @@ export function useWebSocket(gameId?: string) {
   const sendMessage = useCallback((message: WSMessage) => {
     if (socket?.readyState === WebSocket.OPEN) {
       try {
+        console.log('Sending WebSocket message:', message.type);
         socket.send(JSON.stringify(message));
       } catch (error) {
         console.error('Error sending message:', error);
@@ -110,10 +119,10 @@ export function useWebSocket(gameId?: string) {
         });
       }
     } else {
-      console.warn('WebSocket is not connected');
+      console.warn('WebSocket is not connected, state:', socket?.readyState);
       toast({
         title: "Not Connected",
-        description: "Unable to communicate with the game server.",
+        description: "Unable to communicate with the game server. Please refresh the page.",
         variant: "destructive",
       });
     }

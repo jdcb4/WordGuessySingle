@@ -13,14 +13,25 @@ const gameSessions = new Map<string, {
 
 function broadcastToGame(gameId: string, message: WSMessage) {
   const session = gameSessions.get(gameId);
-  if (!session) return;
+  if (!session) {
+    console.log('No session found for game:', gameId);
+    return;
+  }
 
   const messageStr = JSON.stringify(message);
+  console.log(`Broadcasting ${message.type} to ${session.clients.size} clients in game:`, gameId);
+
   session.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(messageStr);
     }
   });
+}
+
+// Heartbeat to keep connections alive
+function heartbeat(ws: WebSocket) {
+  console.log('Received pong from client');
+  (ws as any).isAlive = true;
 }
 
 export function registerRoutes(app: Express): Server {
@@ -29,8 +40,30 @@ export function registerRoutes(app: Express): Server {
   // Create WebSocket server
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
+  // Set up heartbeat interval
+  const interval = setInterval(() => {
+    wss.clients.forEach((ws) => {
+      if ((ws as any).isAlive === false) {
+        console.log('Terminating inactive client');
+        return ws.terminate();
+      }
+
+      (ws as any).isAlive = false;
+      ws.ping();
+    });
+  }, 30000);
+
+  wss.on('close', () => {
+    clearInterval(interval);
+  });
+
   wss.on('connection', (ws) => {
+    console.log('New WebSocket connection established');
     let gameId = '';
+
+    // Set up ping-pong
+    (ws as any).isAlive = true;
+    ws.on('pong', () => heartbeat(ws));
 
     ws.on('message', (data) => {
       try {
@@ -96,7 +129,10 @@ export function registerRoutes(app: Express): Server {
           }
 
           case 'start_game': {
-            if (!gameId || !gameSessions.has(gameId)) return;
+            if (!gameId || !gameSessions.has(gameId)) {
+              console.error('Invalid game ID for start_game:', gameId);
+              return;
+            }
             const session = gameSessions.get(gameId);
             if (!session) return;
 
@@ -120,7 +156,10 @@ export function registerRoutes(app: Express): Server {
 
           case 'end_turn':
           case 'next_round': {
-            if (!gameId || !gameSessions.has(gameId)) return;
+            if (!gameId || !gameSessions.has(gameId)) {
+              console.error('Invalid game ID for', message.type, ':', gameId);
+              return;
+            }
             const session = gameSessions.get(gameId);
             if (!session) return;
 
@@ -169,6 +208,10 @@ export function registerRoutes(app: Express): Server {
           }
         }
       }
+    });
+
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
     });
   });
 
