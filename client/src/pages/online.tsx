@@ -17,7 +17,7 @@ export default function Online() {
   const [gameCode, setGameCode] = useState("");
   const [hostGameId] = useState(() => nanoid());
   const [isConnecting, setIsConnecting] = useState(false);
-  const initializeGame = useGameStore(state => state.initializeGame);
+  const { initializeGame, updateGameState } = useGameStore();
   const { connected, sendMessage } = useWebSocket(isJoining ? gameCode : hostGameId);
 
   // Handle hosting a new game
@@ -25,7 +25,7 @@ export default function Online() {
     if (!teamName) return;
     setIsConnecting(true);
 
-    // Initialize game state
+    // Initialize game state with host info
     initializeGame(
       [{ id: 1, name: teamName, score: 0, roundScores: [], isHost: true }],
       [],
@@ -50,6 +50,9 @@ export default function Online() {
   const handleJoin = () => {
     if (!teamName || !gameCode) return;
     setIsConnecting(true);
+
+    // Initialize minimal game state
+    initializeGame([], [], 30, 3, 'online');
 
     // Send join message
     sendMessage({

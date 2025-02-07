@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { GameState, Team, TurnResult, WordResult } from '@shared/schema';
+import { nanoid } from 'nanoid';
 
 interface GameStore extends GameState {
   initializeGame: (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number, gameMode: 'local' | 'online') => void;
@@ -31,7 +32,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
   initializeGame: (teams, excludedCategories, turnDuration, totalRounds, gameMode = 'local') => {
+    // Set gameId for online mode
+    const gameId = gameMode === 'online' ? nanoid() : '';
+
     set({
+      gameId,
       teams,
       excludedCategories,
       turnDuration,
@@ -40,7 +45,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentRound: 1,
       currentTeamIndex: 0,
       gameMode,
-      isGameOver: false
+      isGameOver: false,
+      hostId: gameMode === 'online' ? gameId : undefined
     });
   },
 
