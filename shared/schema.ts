@@ -35,11 +35,11 @@ export type TurnResult = {
 // Game constants
 export const CATEGORIES = [
   "Action",
-  "Category",
-  "Nature", 
+  "Nature",
+  "Thing",
   "Person",
   "Random",
-  "World"
+  "Place"
 ] as const;
 
 export const TURN_DURATIONS = [5, 15, 30, 45] as const;

@@ -123,7 +123,8 @@ export default function Game() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="flex-1 overflow-y-auto p-6 pb-32 space-y-6">
+      {/* Scrollable content area */}
+      <div className="flex-1 overflow-y-auto p-6 pb-96 space-y-6">
         <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
         <WordDisplay
@@ -136,42 +137,51 @@ export default function Game() {
 
         <div className="space-y-4">
           <Card className="p-4">
-            <div className="text-lg font-medium mb-2">
-              Current Score: {getCurrentScore()}
-            </div>
+            <div className="text-lg font-medium mb-2">Results</div>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="font-medium text-primary mb-2">Guessed Words</h3>
-                <ul className="space-y-1">
-                  {results.filter(r => r.correct).map((result, i) => (
-                    <li key={i} className="text-sm">
-                      {result.word}
-                    </li>
-                  ))}
-                </ul>
+                <div className="max-h-48 overflow-y-auto">
+                  <ul className="space-y-1">
+                    {results.filter(r => r.correct).map((result, i) => (
+                      <li key={i} className="text-sm">
+                        {result.word}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
               <div className="border-l pl-4">
                 <h3 className="font-medium text-destructive mb-2">Skipped Words</h3>
-                <ul className="space-y-1">
-                  {results.filter(r => !r.correct).map((result, i) => (
-                    <li key={i} className="text-sm text-muted-foreground">
-                      {result.word}
-                    </li>
-                  ))}
-                </ul>
+                <div className="max-h-48 overflow-y-auto">
+                  <ul className="space-y-1">
+                    {results.filter(r => !r.correct).map((result, i) => (
+                      <li key={i} className="text-sm text-muted-foreground">
+                        {result.word}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
           </Card>
+        </div>
+      </div>
 
+      {/* Fixed position container for score and buttons */}
+      <div className="fixed bottom-[10%] left-0 right-0 space-y-4 p-4 bg-background/80 backdrop-blur-sm border-t">
+        {/* Score display */}
+        <Card className="p-4 mb-4">
+          <div className="text-lg font-medium">
+            Current Score: {getCurrentScore()}
+          </div>
           <ScoreDisplay
             teams={teams}
             currentTeamId={teams[currentTeamIndex].id}
           />
-        </div>
-      </div>
+        </Card>
 
-      {/* Fixed action buttons */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t">
+        {/* Action buttons */}
         <div className="max-w-md mx-auto flex gap-4">
           <Button
             size="lg"
@@ -194,6 +204,7 @@ export default function Game() {
         </div>
       </div>
 
+      {/* Time's up overlay */}
       {timer.isFinished && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4 space-y-4">

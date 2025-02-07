@@ -1,30 +1,25 @@
 import { Category } from "@shared/schema";
+import wordsData from "../../../attached_assets/words.json";
 
+// Create a map to store words by category
 const wordsByCategory: Record<Category, string[]> = {
-  Action: [
-    "Running", "Dancing", "Jumping", "Swimming", "Singing",
-    "Laughing", "Sleeping", "Eating", "Writing", "Reading"
-  ],
-  Category: [
-    "Animals", "Colors", "Foods", "Sports", "Countries",
-    "Movies", "Music", "Books", "Jobs", "Weather"
-  ],
-  Nature: [
-    "Mountain", "Ocean", "Forest", "Desert", "River",
-    "Volcano", "Island", "Valley", "Beach", "Lake"
-  ],
-  Person: [
-    "Teacher", "Doctor", "Artist", "Chef", "Athlete",
-    "Scientist", "Musician", "Writer", "Actor", "Farmer"
-  ],
-  Random: [], // Will be populated from other categories
-  World: [
-    "Paris", "Tokyo", "London", "Rome", "New York",
-    "Egypt", "Brazil", "India", "China", "Australia"
-  ]
+  Action: [],
+  Nature: [],
+  Thing: [],
+  Person: [],
+  Random: [],
+  Place: []
 };
 
-// Populate Random category
+// Populate categories from JSON data
+wordsData.forEach(item => {
+  const category = item.category as Category;
+  if (wordsByCategory[category]) {
+    wordsByCategory[category].push(item.word);
+  }
+});
+
+// Populate Random category with words from all other categories
 wordsByCategory.Random = Object.entries(wordsByCategory)
   .filter(([category]) => category !== "Random")
   .flatMap(([_, words]) => words);
