@@ -30,7 +30,7 @@ export function registerRoutes(app: Express): Server {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
   wss.on('connection', (ws) => {
-    let gameId: string | null = null;
+    let gameId = '';  // Initialize as empty string instead of null
 
     ws.on('message', (data) => {
       try {
@@ -43,14 +43,16 @@ export function registerRoutes(app: Express): Server {
             // If game exists, join it
             if (gameSessions.has(requestedGameId)) {
               gameId = requestedGameId;
-              const session = gameSessions.get(gameId)!;
-              session.clients.add(ws);
+              const session = gameSessions.get(gameId);
+              if (session) {
+                session.clients.add(ws);
 
-              // Send current game state to new player
-              ws.send(JSON.stringify({
-                type: 'game_state',
-                payload: session.state
-              }));
+                // Send current game state to new player
+                ws.send(JSON.stringify({
+                  type: 'game_state',
+                  payload: session.state
+                }));
+              }
             } else {
               // Create new game if it doesn't exist
               gameId = requestedGameId || nanoid();
@@ -65,23 +67,27 @@ export function registerRoutes(app: Express): Server {
                   isGameStarted: false,
                   isGameOver: false,
                   turnDuration: 30,
-                  hostId: gameId // Use gameId as hostId for the creator
+                  hostId: gameId
                 },
                 clients: new Set([ws])
               });
 
               // Send game ID to creator
-              ws.send(JSON.stringify({
-                type: 'game_state',
-                payload: gameSessions.get(gameId)!.state
-              }));
+              const newSession = gameSessions.get(gameId);
+              if (newSession) {
+                ws.send(JSON.stringify({
+                  type: 'game_state',
+                  payload: newSession.state
+                }));
+              }
             }
             break;
           }
 
           case 'start_game': {
             if (!gameId || !gameSessions.has(gameId)) return;
-            const session = gameSessions.get(gameId)!;
+            const session = gameSessions.get(gameId);
+            if (!session) return;
 
             // Update game state
             session.state = {
@@ -101,7 +107,8 @@ export function registerRoutes(app: Express): Server {
           case 'end_turn':
           case 'next_round': {
             if (!gameId || !gameSessions.has(gameId)) return;
-            const session = gameSessions.get(gameId)!;
+            const session = gameSessions.get(gameId);
+            if (!session) return;
 
             // Update game state
             session.state = {
@@ -128,12 +135,14 @@ export function registerRoutes(app: Express): Server {
 
     ws.on('close', () => {
       if (gameId && gameSessions.has(gameId)) {
-        const session = gameSessions.get(gameId)!;
-        session.clients.delete(ws);
+        const session = gameSessions.get(gameId);
+        if (session) {
+          session.clients.delete(ws);
 
-        // Clean up empty game sessions
-        if (session.clients.size === 0) {
-          gameSessions.delete(gameId);
+          // Clean up empty game sessions
+          if (session.clients.size === 0) {
+            gameSessions.delete(gameId);
+          }
         }
       }
     });
