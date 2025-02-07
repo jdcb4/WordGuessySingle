@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import confetti from 'canvas-confetti';
 import useSound from 'use-sound';
+import { QuitGameDialog } from "@/components/quit-game-dialog";
 
 export default function Summary() {
   const [, navigate] = useLocation();
@@ -36,6 +37,7 @@ export default function Summary() {
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-b from-background to-primary/5">
+      <QuitGameDialog />
       <div className="max-w-md mx-auto space-y-8">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}

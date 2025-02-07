@@ -10,6 +10,7 @@ import { WordResult, Category } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import useSound from "use-sound";
+import { QuitGameDialog } from "@/components/quit-game-dialog";
 
 export default function Game() {
   const [, navigate] = useLocation();
@@ -131,6 +132,7 @@ export default function Game() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <QuitGameDialog />
       <div className="flex-1 overflow-y-auto p-6 pb-96 space-y-6">
         <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
