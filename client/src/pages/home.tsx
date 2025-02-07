@@ -20,7 +20,7 @@ export default function Home() {
       <div className="max-w-md mx-auto space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Word Party
+            Word Guessy
           </h1>
           <p className="text-muted-foreground">
             A fun word guessing game for teams
