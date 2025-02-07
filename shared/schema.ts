@@ -54,7 +54,7 @@ export type RoundCount = typeof ROUND_OPTIONS[number];
 
 // WebSocket message types
 export type WSMessage = {
-  type: 'join_game' | 'game_state' | 'start_game' | 'end_turn' | 'next_round' | 'game_over' | 'error';
+  type: 'join_game' | 'game_state' | 'start_game' | 'end_turn' | 'next_round' | 'game_over' | 'error' | 'player_joined' | 'player_left';
   payload: any;
 };
 
