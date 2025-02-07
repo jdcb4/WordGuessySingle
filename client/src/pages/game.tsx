@@ -8,6 +8,7 @@ import { ScoreDisplay } from "@/components/score-display";
 import { getRandomWord, getRandomCategory } from "@/lib/game-data";
 import { WordResult, Category } from "@shared/schema";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import useSound from "use-sound";
 
 export default function Game() {
@@ -48,11 +49,16 @@ export default function Game() {
     setCurrentWord(getRandomWord(currentCategory, usedWords));
   }, []);
 
+  const getCurrentScore = () => {
+    const correctWords = results.filter(r => r.correct);
+    return correctWords.length - Math.max(0, skipsUsed - 1);
+  };
+
   const handleNext = () => {
     playCorrectSound();
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: true }]);
-    
+
     const nextCategory = getRandomCategory(excludedCategories);
     setCurrentCategory(nextCategory);
     setCurrentWord(getRandomWord(nextCategory, usedWords));
@@ -63,19 +69,16 @@ export default function Game() {
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: false }]);
     setSkipsUsed(skipsUsed + 1);
-    
+
     const nextCategory = getRandomCategory(excludedCategories);
     setCurrentCategory(nextCategory);
     setCurrentWord(getRandomWord(nextCategory, usedWords));
   };
 
   const handleTurnEnd = () => {
-    const correctWords = results.filter(r => r.correct);
-    const score = correctWords.length - Math.max(0, skipsUsed - 1);
-    
     addTurnResult({
       teamId: teams[currentTeamIndex].id,
-      score,
+      score: getCurrentScore(),
       words: results
     });
 
@@ -98,6 +101,9 @@ export default function Game() {
           <h2 className="text-2xl font-bold">
             {teams[currentTeamIndex].name}'s Turn
           </h2>
+          <div className="text-lg text-muted-foreground">
+            Category: <span className="font-medium text-primary">{currentCategory}</span>
+          </div>
           <Button size="lg" onClick={() => timer.start()}>
             Start Turn
           </Button>
@@ -109,7 +115,7 @@ export default function Game() {
   return (
     <div className="min-h-screen p-6 space-y-6">
       <TimerDisplay timeLeft={timer.timeLeft} total={TURN_DURATION} />
-      
+
       <WordDisplay
         word={currentWord}
         category={currentCategory}
@@ -118,10 +124,40 @@ export default function Game() {
         disabled={timer.isFinished}
       />
 
-      <ScoreDisplay
-        teams={teams}
-        currentTeamId={teams[currentTeamIndex].id}
-      />
+      <div className="space-y-4">
+        <Card className="p-4">
+          <div className="text-lg font-medium mb-2">
+            Current Score: {getCurrentScore()}
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <h3 className="font-medium text-primary mb-2">Guessed Words</h3>
+              <ul className="space-y-1">
+                {results.filter(r => r.correct).map((result, i) => (
+                  <li key={i} className="text-sm">
+                    {result.word} ({result.category})
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-medium text-destructive mb-2">Skipped Words</h3>
+              <ul className="space-y-1">
+                {results.filter(r => !r.correct).map((result, i) => (
+                  <li key={i} className="text-sm text-muted-foreground">
+                    {result.word} ({result.category})
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </Card>
+
+        <ScoreDisplay
+          teams={teams}
+          currentTeamId={teams[currentTeamIndex].id}
+        />
+      </div>
 
       {timer.isFinished && (
         <div className="fixed inset-0 bg-background/80 flex items-center justify-center">
