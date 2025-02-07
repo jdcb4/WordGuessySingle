@@ -28,7 +28,7 @@ export function InfoDialog() {
         </DialogHeader>
         <div className="aspect-square relative overflow-hidden rounded-lg">
           <img
-            src="/junto crew.jpg"
+            src="/junto-crew.jpg"
             alt="Junto Crew"
             className="object-cover w-full h-full"
           />
