@@ -16,7 +16,7 @@ export function useWebSocket(gameId?: string) {
     try {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsUrl = `${protocol}//${window.location.host}/ws`;
-      console.log('Connecting to WebSocket:', wsUrl);
+      console.log('Connecting to WebSocket:', wsUrl, 'for game:', gameId);
 
       const ws = new WebSocket(wsUrl);
 
@@ -120,9 +120,15 @@ export function useWebSocket(gameId?: string) {
 
   // Initial connection
   useEffect(() => {
-    const cleanup = connect();
-    return () => cleanup?.();
-  }, [connect]);
+    if (gameId) {
+      console.log('Initializing WebSocket connection for game:', gameId);
+      const cleanup = connect();
+      return () => {
+        console.log('Cleaning up WebSocket connection for game:', gameId);
+        cleanup?.();
+      };
+    }
+  }, [connect, gameId]);
 
   // Send message helper
   const sendMessage = useCallback((message: WSMessage) => {

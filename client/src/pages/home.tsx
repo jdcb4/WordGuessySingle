@@ -40,13 +40,11 @@ export default function Home() {
   const handleJoinGame = () => {
     if (joinGameId) {
       setGameId(joinGameId);
-      navigate("/game");
+      // Wait for WebSocket to connect with new gameId
+      setTimeout(() => {
+        navigate("/game");
+      }, 500);
     }
-  };
-
-  // Generate shareable link
-  const getShareableLink = () => {
-    return `${window.location.origin}?game=${gameId}`;
   };
 
   // Check URL for game ID
@@ -55,7 +53,10 @@ export default function Home() {
     const gameIdFromUrl = params.get('game');
     if (gameIdFromUrl) {
       setGameId(gameIdFromUrl);
-      navigate("/game");
+      // Wait for WebSocket to connect with new gameId
+      setTimeout(() => {
+        navigate("/game");
+      }, 500);
     }
   }, []);
 
@@ -111,10 +112,10 @@ export default function Home() {
 
         {connected && !showJoinInput && (
           <div className="mt-4 p-4 bg-primary/5 rounded-lg">
-            <p className="text-sm text-muted-foreground mb-2">Share this link with friends to join your game:</p>
+            <p className="text-sm text-muted-foreground mb-2">Share this code with friends to join your game:</p>
             <Input
               readOnly
-              value={getShareableLink()}
+              value={gameId}
               onClick={(e) => (e.target as HTMLInputElement).select()}
             />
           </div>
