@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import { GameState, Team, TurnResult, WordResult } from '@shared/schema';
+import { GameState, Team, TurnResult } from '@shared/schema';
 import { nanoid } from 'nanoid';
 
 interface GameStore extends GameState {
-  initializeGame: (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number, gameMode: 'local' | 'online') => void;
+  initializeGame: (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number, gameMode: 'local' | 'online', gameId?: string) => void;
   updateTeamScore: (teamId: number, points: number) => void;
   nextTeam: () => void;
   nextRound: () => void;
@@ -31,12 +31,12 @@ const initialState: GameState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  initializeGame: (teams, excludedCategories, turnDuration, totalRounds, gameMode = 'local') => {
-    // Set gameId for online mode
-    const gameId = gameMode === 'online' ? nanoid() : '';
+  initializeGame: (teams, excludedCategories, turnDuration, totalRounds, gameMode = 'local', gameId = '') => {
+    // For online mode, use provided gameId or generate a new one
+    const finalGameId = gameMode === 'online' ? gameId : '';
 
     set({
-      gameId,
+      gameId: finalGameId,
       teams,
       excludedCategories,
       turnDuration,
@@ -46,7 +46,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentTeamIndex: 0,
       gameMode,
       isGameOver: false,
-      hostId: gameMode === 'online' ? gameId : undefined
+      hostId: gameMode === 'online' ? finalGameId : undefined
     });
   },
 

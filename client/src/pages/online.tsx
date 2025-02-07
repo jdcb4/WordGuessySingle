@@ -15,14 +15,18 @@ export default function Online() {
   const [isJoining, setIsJoining] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [gameCode, setGameCode] = useState("");
-  const [hostGameId] = useState(() => nanoid());
   const [isConnecting, setIsConnecting] = useState(false);
-  const { initializeGame, updateGameState } = useGameStore();
-  const { connected, sendMessage } = useWebSocket(isJoining ? gameCode : hostGameId);
+  const { initializeGame } = useGameStore();
+
+  // Only connect to WebSocket when actually joining or hosting
+  const { connected, sendMessage } = useWebSocket(isConnecting ? gameCode : undefined);
 
   // Handle hosting a new game
   const handleHost = () => {
     if (!teamName) return;
+
+    const newGameId = nanoid();
+    setGameCode(newGameId);
     setIsConnecting(true);
 
     // Initialize game state with host info
@@ -31,14 +35,15 @@ export default function Online() {
       [],
       30,
       3,
-      'online'
+      'online',
+      newGameId
     );
 
     // Send join message as host
     sendMessage({
       type: 'join_game',
       payload: {
-        gameId: hostGameId,
+        gameId: newGameId,
         teamName,
       }
     });
@@ -49,10 +54,18 @@ export default function Online() {
   // Handle joining an existing game
   const handleJoin = () => {
     if (!teamName || !gameCode) return;
+
     setIsConnecting(true);
 
     // Initialize minimal game state
-    initializeGame([], [], 30, 3, 'online');
+    initializeGame(
+      [], 
+      [], 
+      30, 
+      3, 
+      'online',
+      gameCode
+    );
 
     // Send join message
     sendMessage({
@@ -66,13 +79,20 @@ export default function Online() {
     navigate("/client");
   };
 
+  const handleBack = () => {
+    setIsConnecting(false);
+    setGameCode("");
+    setTeamName("");
+    navigate("/");
+  };
+
   return (
     <div className="min-h-screen p-6 bg-gradient-to-b from-background to-primary/5">
       <InfoDialog />
       <div className="max-w-md mx-auto space-y-6">
         <Button
           variant="ghost"
-          onClick={() => navigate("/")}
+          onClick={handleBack}
           className="mb-6"
         >
           ← Back
@@ -102,7 +122,7 @@ export default function Online() {
                   size="lg"
                   className="w-full relative"
                   onClick={handleHost}
-                  disabled={!teamName || isConnecting}
+                  disabled={!teamName || (isConnecting && !connected)}
                 >
                   {isConnecting ? (
                     <>
@@ -149,7 +169,7 @@ export default function Online() {
                   size="lg"
                   className="w-full relative"
                   onClick={handleJoin}
-                  disabled={!teamName || !gameCode || isConnecting || !connected}
+                  disabled={!teamName || !gameCode || (isConnecting && !connected)}
                 >
                   {isConnecting ? (
                     <>
@@ -166,6 +186,7 @@ export default function Online() {
                   onClick={() => {
                     setIsJoining(false);
                     setGameCode("");
+                    setIsConnecting(false);
                   }}
                 >
                   Back
