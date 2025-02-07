@@ -4,10 +4,12 @@ import { ScoreDisplay } from "@/components/score-display";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import confetti from 'canvas-confetti';
+import useSound from 'use-sound';
 
 export default function Summary() {
   const [, navigate] = useLocation();
   const { teams, reset } = useGameStore();
+  const [playWoohoo] = useSound('/woohoo.mp3', { volume: 0.5 });
 
   // Find winning team(s)
   const maxScore = Math.max(...teams.map(t => t.score));
@@ -18,13 +20,18 @@ export default function Summary() {
     navigate("/");
   };
 
-  // Trigger confetti
+  // Trigger confetti and sound effect
   setTimeout(() => {
     confetti({
       particleCount: 100,
       spread: 70,
       origin: { y: 0.6 }
     });
+    try {
+      playWoohoo();
+    } catch (error) {
+      console.error('Error playing woohoo sound:', error);
+    }
   }, 500);
 
   return (
