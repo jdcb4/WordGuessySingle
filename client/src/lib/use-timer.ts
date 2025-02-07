@@ -1,24 +1,22 @@
 import { useState, useEffect, useCallback } from 'react';
 
-export const TURN_DURATION = 60;
-
-export function useTimer() {
-  const [timeLeft, setTimeLeft] = useState(TURN_DURATION);
+export function useTimer(duration: number) {
+  const [timeLeft, setTimeLeft] = useState(duration);
   const [isActive, setIsActive] = useState(false);
 
   const start = useCallback(() => {
-    setTimeLeft(TURN_DURATION);
+    setTimeLeft(duration);
     setIsActive(true);
-  }, []);
+  }, [duration]);
 
   const stop = useCallback(() => {
     setIsActive(false);
   }, []);
 
   const reset = useCallback(() => {
-    setTimeLeft(TURN_DURATION);
+    setTimeLeft(duration);
     setIsActive(false);
-  }, []);
+  }, [duration]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;

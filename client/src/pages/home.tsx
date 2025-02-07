@@ -8,8 +8,8 @@ export default function Home() {
   const [, navigate] = useLocation();
   const initializeGame = useGameStore(state => state.initializeGame);
 
-  const handleStart = (teams: Team[], excludedCategories: string[]) => {
-    initializeGame(teams, excludedCategories);
+  const handleStart = (teams: Team[], excludedCategories: string[], turnDuration: number) => {
+    initializeGame(teams, excludedCategories, turnDuration);
     navigate("/game");
   };
 

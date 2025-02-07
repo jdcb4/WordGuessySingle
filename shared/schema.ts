@@ -17,6 +17,7 @@ export type GameState = {
   excludedCategories: string[];
   isGameStarted: boolean;
   isGameOver: boolean;
+  turnDuration: number;
 };
 
 export type WordResult = {
@@ -41,7 +42,10 @@ export const CATEGORIES = [
   "World"
 ] as const;
 
+export const TURN_DURATIONS = [5, 15, 30, 45] as const;
+
 export type Category = typeof CATEGORIES[number];
+export type TurnDuration = typeof TURN_DURATIONS[number];
 
 export const gameStateSchema = z.object({
   teams: z.array(z.object({
@@ -54,5 +58,6 @@ export const gameStateSchema = z.object({
   currentTeamIndex: z.number(),
   excludedCategories: z.array(z.string()),
   isGameStarted: z.boolean(),
-  isGameOver: z.boolean()
+  isGameOver: z.boolean(),
+  turnDuration: z.number()
 });

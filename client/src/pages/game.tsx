@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useGameStore } from "@/lib/use-game-store";
-import { useTimer, TURN_DURATION } from "@/lib/use-timer";
+import { useTimer } from "@/lib/use-timer";
 import { TimerDisplay } from "@/components/timer-display";
 import { WordDisplay } from "@/components/word-display";
 import { ScoreDisplay } from "@/components/score-display";
@@ -18,6 +18,7 @@ export default function Game() {
     currentTeamIndex,
     excludedCategories,
     isGameOver,
+    turnDuration,
     nextTeam,
     addTurnResult
   } = useGameStore();
@@ -30,7 +31,7 @@ export default function Game() {
   const [results, setResults] = useState<WordResult[]>([]);
   const [skipsUsed, setSkipsUsed] = useState(0);
 
-  const timer = useTimer();
+  const timer = useTimer(turnDuration);
   const [playTimerSound] = useSound('/timer-beep.mp3', { volume: 0.5 });
   const [playCorrectSound] = useSound('/correct.mp3', { volume: 0.5 });
   const [playSkipSound] = useSound('/skip.mp3', { volume: 0.5 });
@@ -114,7 +115,7 @@ export default function Game() {
 
   return (
     <div className="min-h-screen p-6 space-y-6">
-      <TimerDisplay timeLeft={timer.timeLeft} total={TURN_DURATION} />
+      <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
       <WordDisplay
         word={currentWord}

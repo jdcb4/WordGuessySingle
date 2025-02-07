@@ -3,17 +3,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Team } from "@shared/schema";
+import { Team, TURN_DURATIONS } from "@shared/schema";
 import { CategorySelect } from "./category-select";
 
 interface TeamSetupProps {
-  onStart: (teams: Team[], excludedCategories: string[]) => void;
+  onStart: (teams: Team[], excludedCategories: string[], turnDuration: number) => void;
 }
 
 export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
   const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
+  const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
 
   const handleStart = () => {
     const teams: Team[] = Array.from({ length: teamCount }, (_, i) => ({
@@ -22,7 +23,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       score: 0,
       roundScores: []
     }));
-    onStart(teams, excludedCategories);
+    onStart(teams, excludedCategories, turnDuration);
   };
 
   return (
@@ -38,6 +39,22 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
               className="flex-1"
             >
               {num}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label>Turn Duration (seconds)</Label>
+        <div className="flex gap-2">
+          {TURN_DURATIONS.map(duration => (
+            <Button
+              key={duration}
+              variant={turnDuration === duration ? "default" : "outline"}
+              onClick={() => setTurnDuration(duration)}
+              className="flex-1"
+            >
+              {duration}s
             </Button>
           ))}
         </div>
