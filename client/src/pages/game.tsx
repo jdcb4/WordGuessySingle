@@ -40,7 +40,7 @@ export default function Game() {
 
   // Timer sound effect
   useEffect(() => {
-    if (timer.timeLeft <= 5 && timer.timeLeft > 0 && timer.isActive) {
+    if (timer.timeLeft === 5 && timer.isActive) {
       try {
         playTimerSound();
       } catch (error) {
