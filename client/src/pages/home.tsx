@@ -33,7 +33,10 @@ export default function Home() {
       }
     });
 
-    navigate("/game");
+    // Wait for state to sync before navigating
+    setTimeout(() => {
+      navigate("/game");
+    }, 1000);
   };
 
   // Handle game joining
@@ -43,7 +46,7 @@ export default function Home() {
       // Wait for WebSocket to connect with new gameId
       setTimeout(() => {
         navigate("/game");
-      }, 500);
+      }, 1000);
     }
   };
 
@@ -56,9 +59,9 @@ export default function Home() {
       // Wait for WebSocket to connect with new gameId
       setTimeout(() => {
         navigate("/game");
-      }, 500);
+      }, 1000);
     }
-  }, []);
+  }, [navigate]);
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-b from-background to-primary/5">
@@ -96,7 +99,7 @@ export default function Home() {
               <Button
                 className="flex-1"
                 onClick={handleJoinGame}
-                disabled={!joinGameId}
+                disabled={!joinGameId || !connected}
               >
                 Join Game
               </Button>

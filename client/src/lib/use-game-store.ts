@@ -29,18 +29,28 @@ const initialState: GameState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  initializeGame: (teams, excludedCategories, turnDuration, totalRounds) => set(state => ({
-    ...state,
-    teams,
-    excludedCategories,
-    turnDuration,
-    totalRounds,
-    isGameStarted: true,
-    currentRound: 1,
-    currentTeamIndex: 0
-  })),
+  initializeGame: (teams, excludedCategories, turnDuration, totalRounds) => {
+    const currentState = get();
+    set({
+      ...currentState,
+      teams,
+      excludedCategories,
+      turnDuration,
+      totalRounds,
+      isGameStarted: true,
+      currentRound: 1,
+      currentTeamIndex: 0
+    });
+  },
 
-  updateGameState: (state) => set(state),
+  updateGameState: (state) => {
+    // Preserve local state that shouldn't be overwritten
+    const currentState = get();
+    set({
+      ...state,
+      hostId: currentState.hostId // Preserve host ID
+    });
+  },
 
   updateTeamScore: (teamId, points) => set(state => ({
     teams: state.teams.map(team =>
