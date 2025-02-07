@@ -21,7 +21,8 @@ export default function Game() {
     turnDuration,
     nextTeam,
     addTurnResult,
-    currentRound
+    currentRound,
+    totalRounds
   } = useGameStore();
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
@@ -77,7 +78,7 @@ export default function Game() {
 
   const handleTurnEnd = () => {
     const team = teams[currentTeamIndex];
-    const isLastRound = currentRound === 3;
+    const isLastRound = currentRound === totalRounds;
     const isLastTeam = currentTeamIndex === teams.length - 1;
     const shouldEndGame = isLastRound && isLastTeam;
 
