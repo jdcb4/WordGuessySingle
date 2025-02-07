@@ -9,9 +9,11 @@ interface GameStore extends GameState {
   endGame: () => void;
   addTurnResult: (result: TurnResult) => void;
   reset: () => void;
+  updateGameState: (state: GameState) => void; // New method for WebSocket updates
 }
 
 const initialState: GameState = {
+  gameId: '',
   teams: [],
   currentRound: 1,
   totalRounds: 3,
@@ -19,7 +21,8 @@ const initialState: GameState = {
   excludedCategories: [],
   isGameStarted: false,
   isGameOver: false,
-  turnDuration: 30
+  turnDuration: 30,
+  hostId: undefined
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -35,6 +38,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
     currentTeamIndex: 0
   }),
 
+  updateGameState: (state) => set(state),
+
   updateTeamScore: (teamId, points) => set(state => ({
     teams: state.teams.map(team =>
       team.id === teamId ? {
@@ -46,12 +51,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
 
   nextTeam: () => set(state => {
-    // Calculate next team index
     const nextIndex = (state.currentTeamIndex + 1) % state.teams.length;
     const isRoundComplete = nextIndex === 0;
     const nextRound = isRoundComplete ? state.currentRound + 1 : state.currentRound;
-
-    // Check if game should end based on new state
     const isLastRound = nextRound > state.totalRounds;
 
     return {

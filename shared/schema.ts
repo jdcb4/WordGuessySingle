@@ -11,14 +11,16 @@ export type Team = {
 };
 
 export type GameState = {
+  gameId: string;  // Added for multiplayer support
   teams: Team[];
   currentRound: number;
-  totalRounds: number; // Added total rounds configuration
+  totalRounds: number;
   currentTeamIndex: number;
   excludedCategories: string[];
   isGameStarted: boolean;
   isGameOver: boolean;
   turnDuration: number;
+  hostId?: string;  // Added to track the host
 };
 
 export type WordResult = {
@@ -50,7 +52,36 @@ export type Category = typeof CATEGORIES[number];
 export type TurnDuration = typeof TURN_DURATIONS[number];
 export type RoundCount = typeof ROUND_OPTIONS[number];
 
+// WebSocket message types
+export type WSMessage = {
+  type: 'join_game' | 'game_state' | 'start_game' | 'end_turn' | 'next_round' | 'game_over' | 'error';
+  payload: any;
+};
+
+export type JoinGameMessage = {
+  type: 'join_game';
+  payload: {
+    gameId: string;
+  };
+};
+
+export type GameStateMessage = {
+  type: 'game_state';
+  payload: GameState;
+};
+
+export type StartGameMessage = {
+  type: 'start_game';
+  payload: {
+    teams: Team[];
+    excludedCategories: string[];
+    turnDuration: number;
+    totalRounds: number;
+  };
+};
+
 export const gameStateSchema = z.object({
+  gameId: z.string(),
   teams: z.array(z.object({
     id: z.number(),
     name: z.string(),
@@ -63,5 +94,6 @@ export const gameStateSchema = z.object({
   excludedCategories: z.array(z.string()),
   isGameStarted: z.boolean(),
   isGameOver: z.boolean(),
-  turnDuration: z.number()
+  turnDuration: z.number(),
+  hostId: z.string().optional()
 });
