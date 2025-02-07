@@ -28,7 +28,8 @@ export default function Game() {
     totalRounds,
     isGameStarted,
     gameId,
-    isHost
+    isHost,
+    gameMode // Added gameMode
   } = useGameStore();
   const { connected, sendMessage } = useWebSocket(gameId);
 
@@ -47,11 +48,11 @@ export default function Game() {
 
   // Redirect if game not started
   useEffect(() => {
-    if (!isGameStarted || !connected) {
+    if (!isGameStarted || (gameMode === 'online' && !connected)) {
       navigate("/");
       return;
     }
-  }, [isGameStarted, connected, navigate]);
+  }, [isGameStarted, connected, navigate, gameMode]);
 
   // Initialize game state
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function Game() {
   }, [timer.timeLeft, playTimerSound, timer.isActive]);
 
   // Loading state
-  if (!teams.length || !isGameStarted || !connected) {
+  if (!teams.length || !isGameStarted || (gameMode === 'online' && !connected)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-2">
@@ -150,7 +151,9 @@ export default function Game() {
   };
 
   // Only the current team's turn should be interactive
-  const isCurrentTeamsTurn = isHost() || teams[currentTeamIndex].id === team?.id;
+  const isCurrentTeamsTurn = 
+    gameMode === 'local' || 
+    isHost() || teams[currentTeamIndex].id === teams[currentTeamIndex]?.id;
 
   if (!timer.isActive && !timer.isFinished) {
     return (

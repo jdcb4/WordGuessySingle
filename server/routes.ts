@@ -32,7 +32,7 @@ function broadcastToGame(gameId: string, message: WSMessage) {
   });
 }
 
-// Heartbeat to keep connections alive
+// Heartbeat unchanged
 function heartbeat(ws: WebSocket) {
   console.log('Received pong from client');
   (ws as any).isAlive = true;
@@ -40,11 +40,9 @@ function heartbeat(ws: WebSocket) {
 
 export function registerRoutes(app: Express): Server {
   const httpServer = createServer(app);
-
-  // Create WebSocket server
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
 
-  // Set up heartbeat interval
+  // Heartbeat interval setup remains unchanged
   const interval = setInterval(() => {
     wss.clients.forEach((ws) => {
       if ((ws as any).isAlive === false) {
@@ -76,7 +74,7 @@ export function registerRoutes(app: Express): Server {
 
         switch (message.type) {
           case 'join_game': {
-            const { gameId: requestedGameId } = message.payload;
+            const { gameId: requestedGameId, teamName } = message.payload;
             console.log('Join game request for:', requestedGameId);
 
             // If game exists, join it
@@ -87,6 +85,15 @@ export function registerRoutes(app: Express): Server {
                 session.clients.add(ws);
                 console.log('Player joined existing game:', gameId);
 
+                // Add the new team to the game state
+                session.state.teams.push({
+                  id: session.state.teams.length + 1,
+                  name: teamName,
+                  score: 0,
+                  roundScores: [],
+                  isHost: false
+                });
+
                 // Send current game state to new player
                 ws.send(JSON.stringify({
                   type: 'game_state',
@@ -95,8 +102,8 @@ export function registerRoutes(app: Express): Server {
 
                 // Notify other players that someone joined
                 broadcastToGame(gameId, {
-                  type: 'player_joined',
-                  payload: { gameId }
+                  type: 'team_joined',
+                  payload: { teamName }
                 });
               }
             } else {
@@ -106,7 +113,13 @@ export function registerRoutes(app: Express): Server {
 
               const newState: GameState = {
                 gameId,
-                teams: [],
+                teams: [{
+                  id: 1,
+                  name: teamName,
+                  score: 0,
+                  roundScores: [],
+                  isHost: true
+                }],
                 currentRound: 1,
                 totalRounds: 3,
                 currentTeamIndex: 0,
@@ -114,7 +127,8 @@ export function registerRoutes(app: Express): Server {
                 isGameStarted: false,
                 isGameOver: false,
                 turnDuration: 30,
-                hostId: gameId
+                hostId: gameId,
+                gameMode: 'online'
               };
 
               gameSessions.set(gameId, {
