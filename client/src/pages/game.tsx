@@ -38,11 +38,16 @@ export default function Game() {
   const [playCorrectSound] = useSound('/correct.mp3', { volume: 0.5 });
   const [playSkipSound] = useSound('/skip.mp3', { volume: 0.5 });
 
+  // Timer sound effect
   useEffect(() => {
-    if (timer.timeLeft <= 5 && timer.timeLeft > 0) {
-      playTimerSound();
+    if (timer.timeLeft <= 5 && timer.timeLeft > 0 && timer.isActive) {
+      try {
+        playTimerSound();
+      } catch (error) {
+        console.error('Error playing timer sound:', error);
+      }
     }
-  }, [timer.timeLeft, playTimerSound]);
+  }, [timer.timeLeft, playTimerSound, timer.isActive]);
 
   useEffect(() => {
     if (!teams.length) {
@@ -58,21 +63,25 @@ export default function Game() {
   };
 
   const handleNext = () => {
-    playCorrectSound();
+    try {
+      playCorrectSound();
+    } catch (error) {
+      console.error('Error playing correct sound:', error);
+    }
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: true }]);
-
-    // Keep using the same category for the next word
     setCurrentWord(getRandomWord(currentCategory, usedWords));
   };
 
   const handleSkip = () => {
-    playSkipSound();
+    try {
+      playSkipSound();
+    } catch (error) {
+      console.error('Error playing skip sound:', error);
+    }
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: false }]);
     setSkipsUsed(skipsUsed + 1);
-
-    // Keep using the same category for the next word
     setCurrentWord(getRandomWord(currentCategory, usedWords));
   };
 
@@ -95,11 +104,9 @@ export default function Game() {
       timer.reset();
       setResults([]);
       setSkipsUsed(0);
-      // Select a new category for the next turn
       const newCategory = getRandomCategory(excludedCategories);
       setCurrentCategory(newCategory);
       setCurrentWord(getRandomWord(newCategory, new Set()));
-      // Clear used words for the new turn
       usedWords.clear();
     }
   };
@@ -124,7 +131,6 @@ export default function Game() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Scrollable content area */}
       <div className="flex-1 overflow-y-auto p-6 pb-96 space-y-6">
         <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
@@ -169,9 +175,7 @@ export default function Game() {
         </div>
       </div>
 
-      {/* Fixed position container for score and buttons */}
       <div className="fixed bottom-[10%] left-0 right-0 space-y-4 p-4 bg-background/80 backdrop-blur-sm border-t">
-        {/* Score display */}
         <Card className="p-4 mb-4">
           <div className="text-lg font-medium">
             Current Score: {getCurrentScore()}
@@ -182,7 +186,6 @@ export default function Game() {
           />
         </Card>
 
-        {/* Action buttons */}
         <div className="max-w-md mx-auto flex gap-4">
           <Button
             size="lg"
@@ -205,7 +208,6 @@ export default function Game() {
         </div>
       </div>
 
-      {/* Time's up overlay */}
       {timer.isFinished && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4 space-y-4">
