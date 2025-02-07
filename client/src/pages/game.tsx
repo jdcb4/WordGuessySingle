@@ -20,7 +20,8 @@ export default function Game() {
     isGameOver,
     turnDuration,
     nextTeam,
-    addTurnResult
+    addTurnResult,
+    currentRound
   } = useGameStore();
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
@@ -75,13 +76,18 @@ export default function Game() {
   };
 
   const handleTurnEnd = () => {
+    const team = teams[currentTeamIndex];
+    const isLastRound = currentRound === 3;
+    const isLastTeam = currentTeamIndex === teams.length - 1;
+    const shouldEndGame = isLastRound && isLastTeam;
+
     addTurnResult({
-      teamId: teams[currentTeamIndex].id,
+      teamId: team.id,
       score: getCurrentScore(),
       words: results
     });
 
-    if (isGameOver) {
+    if (shouldEndGame) {
       navigate("/summary");
     } else {
       nextTeam();
@@ -139,7 +145,7 @@ export default function Game() {
                 <ul className="space-y-1">
                   {results.filter(r => r.correct).map((result, i) => (
                     <li key={i} className="text-sm">
-                      {result.word} ({result.category})
+                      {result.word}
                     </li>
                   ))}
                 </ul>
@@ -149,7 +155,7 @@ export default function Game() {
                 <ul className="space-y-1">
                   {results.filter(r => !r.correct).map((result, i) => (
                     <li key={i} className="text-sm text-muted-foreground">
-                      {result.word} ({result.category})
+                      {result.word}
                     </li>
                   ))}
                 </ul>
