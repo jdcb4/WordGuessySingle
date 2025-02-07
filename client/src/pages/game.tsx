@@ -114,55 +114,81 @@ export default function Game() {
   }
 
   return (
-    <div className="min-h-screen p-6 space-y-6">
-      <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 overflow-y-auto p-6 pb-32 space-y-6">
+        <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
-      <WordDisplay
-        word={currentWord}
-        category={currentCategory}
-        onNext={handleNext}
-        onSkip={handleSkip}
-        disabled={timer.isFinished}
-      />
-
-      <div className="space-y-4">
-        <Card className="p-4">
-          <div className="text-lg font-medium mb-2">
-            Current Score: {getCurrentScore()}
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <h3 className="font-medium text-primary mb-2">Guessed Words</h3>
-              <ul className="space-y-1">
-                {results.filter(r => r.correct).map((result, i) => (
-                  <li key={i} className="text-sm">
-                    {result.word} ({result.category})
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-medium text-destructive mb-2">Skipped Words</h3>
-              <ul className="space-y-1">
-                {results.filter(r => !r.correct).map((result, i) => (
-                  <li key={i} className="text-sm text-muted-foreground">
-                    {result.word} ({result.category})
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </Card>
-
-        <ScoreDisplay
-          teams={teams}
-          currentTeamId={teams[currentTeamIndex].id}
+        <WordDisplay
+          word={currentWord}
+          category={currentCategory}
+          onNext={handleNext}
+          onSkip={handleSkip}
+          disabled={timer.isFinished}
         />
+
+        <div className="space-y-4">
+          <Card className="p-4">
+            <div className="text-lg font-medium mb-2">
+              Current Score: {getCurrentScore()}
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <h3 className="font-medium text-primary mb-2">Guessed Words</h3>
+                <ul className="space-y-1">
+                  {results.filter(r => r.correct).map((result, i) => (
+                    <li key={i} className="text-sm">
+                      {result.word} ({result.category})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <h3 className="font-medium text-destructive mb-2">Skipped Words</h3>
+                <ul className="space-y-1">
+                  {results.filter(r => !r.correct).map((result, i) => (
+                    <li key={i} className="text-sm text-muted-foreground">
+                      {result.word} ({result.category})
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          </Card>
+
+          <ScoreDisplay
+            teams={teams}
+            currentTeamId={teams[currentTeamIndex].id}
+          />
+        </div>
+      </div>
+
+      {/* Fixed action buttons */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/80 backdrop-blur-sm border-t">
+        <div className="max-w-md mx-auto flex gap-4">
+          <Button
+            size="lg"
+            variant="default"
+            onClick={handleNext}
+            disabled={timer.isFinished}
+            className="flex-1"
+          >
+            Next
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={handleSkip}
+            disabled={timer.isFinished}
+            className="flex-1"
+          >
+            Skip
+          </Button>
+        </div>
       </div>
 
       {timer.isFinished && (
-        <div className="fixed inset-0 bg-background/80 flex items-center justify-center">
-          <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full space-y-4">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4 space-y-4">
             <h3 className="text-2xl font-bold text-center">Time's Up!</h3>
             <Button
               size="lg"
