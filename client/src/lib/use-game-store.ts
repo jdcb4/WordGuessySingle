@@ -9,7 +9,8 @@ interface GameStore extends GameState {
   endGame: () => void;
   addTurnResult: (result: TurnResult) => void;
   reset: () => void;
-  updateGameState: (state: GameState) => void; // New method for WebSocket updates
+  updateGameState: (state: GameState) => void;
+  isHost: () => boolean;
 }
 
 const initialState: GameState = {
@@ -28,7 +29,8 @@ const initialState: GameState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  initializeGame: (teams, excludedCategories, turnDuration, totalRounds) => set({
+  initializeGame: (teams, excludedCategories, turnDuration, totalRounds) => set(state => ({
+    ...state,
     teams,
     excludedCategories,
     turnDuration,
@@ -36,7 +38,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     isGameStarted: true,
     currentRound: 1,
     currentTeamIndex: 0
-  }),
+  })),
 
   updateGameState: (state) => set(state),
 
@@ -84,6 +86,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
         )
       }));
     }
+  },
+
+  isHost: () => {
+    const state = get();
+    return state.hostId === state.gameId;
   },
 
   reset: () => set(initialState)

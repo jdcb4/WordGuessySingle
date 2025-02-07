@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useGameStore } from "@/lib/use-game-store";
+import { useWebSocket } from "@/lib/use-websocket";
 import { useTimer } from "@/lib/use-timer";
 import { TimerDisplay } from "@/components/timer-display";
 import { WordDisplay } from "@/components/word-display";
@@ -25,8 +26,11 @@ export default function Game() {
     addTurnResult,
     currentRound,
     totalRounds,
-    isGameStarted
+    isGameStarted,
+    gameId,
+    isHost
   } = useGameStore();
+  const { connected, sendMessage } = useWebSocket(gameId);
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
     getRandomCategory(excludedCategories)
@@ -43,11 +47,11 @@ export default function Game() {
 
   // Redirect if game not started
   useEffect(() => {
-    if (!isGameStarted) {
+    if (!isGameStarted || !connected) {
       navigate("/");
       return;
     }
-  }, [isGameStarted, navigate]);
+  }, [isGameStarted, connected, navigate]);
 
   // Initialize game state
   useEffect(() => {
@@ -68,7 +72,7 @@ export default function Game() {
   }, [timer.timeLeft, playTimerSound, timer.isActive]);
 
   // Loading state
-  if (!teams.length || !isGameStarted) {
+  if (!teams.length || !isGameStarted || !connected) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="flex items-center gap-2">
@@ -109,15 +113,27 @@ export default function Game() {
 
   const handleTurnEnd = () => {
     const team = teams[currentTeamIndex];
-    const isLastRound = currentRound === totalRounds;
-    const isLastTeam = currentTeamIndex === teams.length - 1;
-    const shouldEndGame = isLastRound && isLastTeam;
-
-    addTurnResult({
+    const turnResult = {
       teamId: team.id,
       score: getCurrentScore(),
       words: results
+    };
+
+    // Send turn result to all players
+    sendMessage({
+      type: 'end_turn',
+      payload: {
+        turnResult,
+        nextTeamIndex: (currentTeamIndex + 1) % teams.length,
+        currentRound: currentRound + ((currentTeamIndex + 1) === teams.length ? 1 : 0)
+      }
     });
+
+    addTurnResult(turnResult);
+
+    const isLastRound = currentRound === totalRounds;
+    const isLastTeam = currentTeamIndex === teams.length - 1;
+    const shouldEndGame = isLastRound && isLastTeam;
 
     if (shouldEndGame) {
       navigate("/summary");
@@ -133,6 +149,9 @@ export default function Game() {
     }
   };
 
+  // Only the current team's turn should be interactive
+  const isCurrentTeamsTurn = isHost() || teams[currentTeamIndex].id === team?.id;
+
   if (!timer.isActive && !timer.isFinished) {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center">
@@ -143,9 +162,18 @@ export default function Game() {
           <div className="text-lg text-muted-foreground">
             Category: <span className="font-medium text-primary">{currentCategory}</span>
           </div>
-          <Button size="lg" onClick={() => timer.start()}>
-            Start Turn
-          </Button>
+          {isCurrentTeamsTurn && (
+            <Button size="lg" onClick={() => {
+              timer.start();
+              // Notify other players that the turn has started
+              sendMessage({
+                type: 'turn_started',
+                payload: { teamId: teams[currentTeamIndex].id }
+              });
+            }}>
+              Start Turn
+            </Button>
+          )}
         </div>
       </div>
     );
@@ -203,29 +231,31 @@ export default function Game() {
           />
         </Card>
 
-        <div className="max-w-md mx-auto flex gap-4">
-          <Button
-            size="lg"
-            variant="default"
-            onClick={handleNext}
-            disabled={timer.isFinished}
-            className="flex-1"
-          >
-            Next
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={handleSkip}
-            disabled={timer.isFinished}
-            className="flex-1"
-          >
-            Skip
-          </Button>
-        </div>
+        {isCurrentTeamsTurn && (
+          <div className="max-w-md mx-auto flex gap-4">
+            <Button
+              size="lg"
+              variant="default"
+              onClick={handleNext}
+              disabled={timer.isFinished}
+              className="flex-1"
+            >
+              Next
+            </Button>
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={handleSkip}
+              disabled={timer.isFinished}
+              className="flex-1"
+            >
+              Skip
+            </Button>
+          </div>
+        )}
       </div>
 
-      {timer.isFinished && (
+      {timer.isFinished && isCurrentTeamsTurn && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4 space-y-4">
             <h3 className="text-2xl font-bold text-center">Time's Up!</h3>

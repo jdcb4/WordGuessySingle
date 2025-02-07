@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from 'ws';
 import { storage } from "./storage";
 import { nanoid } from 'nanoid';
-import type { GameState, WSMessage, StartGameMessage } from "@shared/schema";
+import type { GameState, WSMessage, StartGameMessage, TurnResult } from "@shared/schema";
 
 // Store active game sessions
 const gameSessions = new Map<string, {
@@ -157,22 +157,33 @@ export function registerRoutes(app: Express): Server {
             break;
           }
 
-          case 'end_turn':
-          case 'next_round': {
+          case 'end_turn': {
             if (!gameId || !gameSessions.has(gameId)) {
-              console.error('Invalid game ID for', message.type, ':', gameId);
+              console.error('Invalid game ID for end_turn:', gameId);
               return;
             }
             const session = gameSessions.get(gameId);
             if (!session) return;
 
-            console.log(`Processing ${message.type} for game:`, gameId);
+            console.log('Processing turn end for game:', gameId);
+
+            const { turnResult, nextTeamIndex, currentRound } = message.payload;
+
+            // Update team scores
+            session.state.teams = session.state.teams.map(team =>
+              team.id === turnResult.teamId
+                ? {
+                    ...team,
+                    score: team.score + turnResult.score,
+                    roundScores: [...team.roundScores, turnResult.score]
+                  }
+                : team
+            );
 
             // Update game state
-            session.state = {
-              ...session.state,
-              ...message.payload
-            };
+            session.state.currentTeamIndex = nextTeamIndex;
+            session.state.currentRound = currentRound;
+            session.state.isGameOver = currentRound > session.state.totalRounds;
 
             // Broadcast updated state to all clients
             broadcastToGame(gameId, {
@@ -181,6 +192,15 @@ export function registerRoutes(app: Express): Server {
             });
             break;
           }
+
+          case 'turn_started': {
+            if (!gameId || !gameSessions.has(gameId)) return;
+
+            // Broadcast turn start to all clients
+            broadcastToGame(gameId, message);
+            break;
+          }
+
           default: {
             console.warn('Unknown message type:', message.type);
             ws.send(JSON.stringify({
