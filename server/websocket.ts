@@ -32,7 +32,8 @@ export function setupWebSocket(server: HTTPServer) {
     pingTimeout: 60000,
     pingInterval: 25000,
     transports: ['websocket', 'polling'],
-    allowEIO3: true
+    allowEIO3: true,
+    connectTimeout: 45000
   });
 
   console.log('Socket.IO server initialized');
@@ -87,12 +88,6 @@ export function setupWebSocket(server: HTTPServer) {
           throw new Error('Game is full');
         }
 
-        // Handle existing player with same team name
-        const existingSocketId = session.clients.get(teamName);
-        if (existingSocketId) {
-          io.to(existingSocketId).emit('kicked', { reason: 'duplicate_team' });
-          session.clients.delete(teamName);
-        }
 
         // Update tracking variables
         currentGameCode = code;

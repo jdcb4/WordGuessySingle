@@ -24,7 +24,9 @@ export function useWebSocket() {
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
       timeout: 60000,
-      autoConnect: false
+      autoConnect: false,
+      forceNew: true,
+      rejectUnauthorized: false
     });
 
     socketRef.current = socket;
