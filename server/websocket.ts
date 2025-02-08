@@ -28,7 +28,9 @@ export function setupWebSocket(server: HTTPServer) {
     cors: {
       origin: "*",
       methods: ["GET", "POST"]
-    }
+    },
+    pingTimeout: 20000,
+    pingInterval: 25000
   });
 
   console.log('Socket.IO server initialized');
@@ -49,6 +51,7 @@ export function setupWebSocket(server: HTTPServer) {
           state: data.state
         };
         gameSessions.set(gameCode, session);
+        socket.join(gameCode); // Host joins the game room
         socket.emit('game_created', { code: gameCode });
         console.log('Game created with code:', gameCode);
       } catch (error) {
@@ -71,7 +74,15 @@ export function setupWebSocket(server: HTTPServer) {
           return;
         }
 
+        // Remove any existing socket with the same team name
+        const existingSocketId = session.clients.get(teamName);
+        if (existingSocketId) {
+          io.to(existingSocketId).emit('kicked', { reason: 'duplicate_team' });
+          session.clients.delete(teamName);
+        }
+
         session.clients.set(teamName, socket.id);
+        socket.join(gameCode); // Client joins the game room
         console.log('Player joined game:', data.code, 'as team:', teamName);
 
         // Notify host of new team
@@ -87,9 +98,6 @@ export function setupWebSocket(server: HTTPServer) {
 
         io.to(session.host).emit('teams_updated', { teams });
         socket.emit('joined_game');
-
-        // Join the game room
-        socket.join(gameCode);
       } catch (error) {
         console.error('Error joining game:', error);
         socket.emit('error', { message: 'Failed to join game' });
@@ -104,6 +112,7 @@ export function setupWebSocket(server: HTTPServer) {
           if (clientId) {
             io.to(clientId).emit('kicked');
             session.clients.delete(data.teamName);
+            socket.leave(gameCode);
             console.log('Team kicked:', data.teamName);
 
             // Update remaining clients
@@ -117,7 +126,7 @@ export function setupWebSocket(server: HTTPServer) {
               }))
             ];
 
-            socket.emit('teams_updated', { teams });
+            io.to(session.host).emit('teams_updated', { teams });
           }
         }
       } catch (error) {
@@ -152,7 +161,10 @@ export function setupWebSocket(server: HTTPServer) {
           } else if (teamName) {
             // Client disconnected
             session.clients.delete(teamName);
+            socket.leave(gameCode);
             console.log('Team disconnected:', teamName);
+
+            // Update remaining clients
             const teams = [
               { id: 1, name: session.state.teams[0].name, score: 0, roundScores: [] },
               ...Array.from(session.clients.keys()).map((name, i) => ({
@@ -162,10 +174,19 @@ export function setupWebSocket(server: HTTPServer) {
                 roundScores: []
               }))
             ];
+
             io.to(session.host).emit('teams_updated', { teams });
           }
         }
       }
     });
+
+    // Handle errors
+    socket.on('error', (error) => {
+      console.error('Socket error:', error);
+      socket.emit('error', { message: 'An unexpected error occurred' });
+    });
   });
+
+  return io;
 }
