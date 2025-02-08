@@ -11,7 +11,7 @@ export function useWebSocket() {
 
   const connect = useCallback(() => {
     if (socketRef.current?.connected) {
-      console.log('Socket.IO already connected, transport:', socketRef.current.io.engine.transport.name);
+      console.log('Socket.IO already connected');
       return;
     }
 
@@ -34,7 +34,7 @@ export function useWebSocket() {
 
     // Connection event handlers
     socket.on('connect', () => {
-      console.log('Socket.IO connected:', socket.id, 'Transport:', socket.io.engine.transport.name);
+      console.log('Socket.IO connected:', socket.id);
       toast({
         title: "Connected",
         description: "Successfully connected to the game server",
@@ -42,7 +42,7 @@ export function useWebSocket() {
     });
 
     socket.on('connect_error', (error) => {
-      console.error('Socket.IO connection error:', error, 'Last transport:', socket.io.engine.transport?.name);
+      console.error('Socket.IO connection error:', error);
       toast({
         title: "Connection Error",
         description: `Failed to connect: ${error.message}`,
@@ -50,12 +50,8 @@ export function useWebSocket() {
       });
     });
 
-    socket.io.engine.on("upgrade", (transport) => {
-      console.log('Socket transport upgraded to:', transport.name);
-    });
-
     socket.on('disconnect', (reason) => {
-      console.log('Socket.IO disconnected:', reason, 'Last transport:', socket.io.engine.transport?.name);
+      console.log('Socket.IO disconnected:', reason);
 
       if (reason === 'io server disconnect') {
         console.log('Server initiated disconnect, attempting reconnect...');
