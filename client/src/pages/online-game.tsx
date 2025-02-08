@@ -1,22 +1,20 @@
-import { useLocation } from "wouter";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Users, Globe } from "lucide-react";
-import { InfoDialog } from "@/components/info-dialog";
+import { useLocation } from "wouter";
+import { Server, UserPlus } from "lucide-react";
 
-export default function Home() {
+export default function OnlineGame() {
   const [, navigate] = useLocation();
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-b from-background to-primary/5">
-      <InfoDialog />
       <div className="max-w-md mx-auto space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Word Guessy
-          </h1>
+          <h2 className="text-2xl font-bold text-primary">
+            Online Game
+          </h2>
           <p className="text-muted-foreground">
-            A fun word guessing game for teams
+            Host a new game or join an existing one
           </p>
         </div>
 
@@ -24,19 +22,19 @@ export default function Home() {
           <Button
             size="lg"
             className="h-24"
-            onClick={() => navigate("/local-game")}
+            onClick={() => navigate("/host-game")}
           >
-            <Users className="mr-2 h-5 w-5" />
-            Pass and Play
+            <Server className="mr-2 h-5 w-5" />
+            Host a Game
           </Button>
           <Button
             size="lg"
             className="h-24"
             variant="outline"
-            onClick={() => navigate("/online-game")}
+            onClick={() => navigate("/join-game")}
           >
-            <Globe className="mr-2 h-5 w-5" />
-            Play Online
+            <UserPlus className="mr-2 h-5 w-5" />
+            Join a Game
           </Button>
         </div>
       </div>
