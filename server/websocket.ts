@@ -1,12 +1,12 @@
-import { WebSocketServer, WebSocket } from 'ws';
-import { Server } from 'http';
+import { Server as HTTPServer } from 'http';
+import { Server } from 'socket.io';
 import { GameState } from '@shared/schema';
 
 // Store active game sessions
 interface GameSession {
   code: string;
-  host: WebSocket;
-  clients: Map<string, WebSocket>; // teamName -> socket
+  host: string; // socket id
+  clients: Map<string, string>; // teamName -> socket id
   state: GameState;
 }
 
@@ -22,58 +22,91 @@ function generateGameCode(): string {
   return code;
 }
 
-export function setupWebSocket(server: Server) {
-  const wss = new WebSocketServer({ 
-    server,
-    path: '/ws',
-    clientTracking: true
+export function setupWebSocket(server: HTTPServer) {
+  const io = new Server(server, {
+    path: '/socket.io',
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
   });
 
-  console.log('WebSocket server initialized');
+  console.log('Socket.IO server initialized');
 
-  wss.on('connection', (socket: WebSocket) => {
-    console.log('New WebSocket connection established');
+  io.on('connection', (socket) => {
+    console.log('New Socket.IO connection established:', socket.id);
 
     let gameCode: string;
     let teamName: string;
 
-    socket.on('message', (rawData) => {
+    socket.on('create_game', (data) => {
       try {
-        const message = JSON.parse(rawData.toString());
-        console.log('Received message:', message);
+        gameCode = generateGameCode();
+        const session: GameSession = {
+          code: gameCode,
+          host: socket.id,
+          clients: new Map(),
+          state: data.state
+        };
+        gameSessions.set(gameCode, session);
+        socket.emit('game_created', { code: gameCode });
+        console.log('Game created with code:', gameCode);
+      } catch (error) {
+        console.error('Error creating game:', error);
+        socket.emit('error', { message: 'Failed to create game' });
+      }
+    });
 
-        switch (message.type) {
-          case 'create_game': {
-            gameCode = generateGameCode();
-            const session: GameSession = {
-              code: gameCode,
-              host: socket,
-              clients: new Map(),
-              state: message.state
-            };
-            gameSessions.set(gameCode, session);
-            socket.send(JSON.stringify({ type: 'game_created', code: gameCode }));
-            console.log('Game created with code:', gameCode);
-            break;
-          }
+    socket.on('join_game', (data) => {
+      try {
+        const session = gameSessions.get(data.code);
+        if (!session) {
+          socket.emit('error', { message: 'Game not found' });
+          return;
+        }
 
-          case 'join_game': {
-            const session = gameSessions.get(message.code);
-            if (!session) {
-              socket.send(JSON.stringify({ type: 'error', message: 'Game not found' }));
-              return;
-            }
+        teamName = data.teamName;
+        if (session.clients.size >= 3) { // Max 4 teams including host
+          socket.emit('error', { message: 'Game is full' });
+          return;
+        }
 
-            teamName = message.teamName;
-            if (session.clients.size >= 3) { // Max 4 teams including host
-              socket.send(JSON.stringify({ type: 'error', message: 'Game is full' }));
-              return;
-            }
+        session.clients.set(teamName, socket.id);
+        console.log('Player joined game:', data.code, 'as team:', teamName);
 
-            session.clients.set(teamName, socket);
-            console.log('Player joined game:', message.code, 'as team:', teamName);
+        // Notify host of new team
+        const teams = [
+          { id: 1, name: session.state.teams[0].name, score: 0, roundScores: [] },
+          ...Array.from(session.clients.keys()).map((name, i) => ({
+            id: i + 2,
+            name,
+            score: 0,
+            roundScores: []
+          }))
+        ];
 
-            // Notify host of new team
+        io.to(session.host).emit('teams_updated', { teams });
+        socket.emit('joined_game');
+
+        // Join the game room
+        socket.join(gameCode);
+      } catch (error) {
+        console.error('Error joining game:', error);
+        socket.emit('error', { message: 'Failed to join game' });
+      }
+    });
+
+    socket.on('kick_team', (data) => {
+      try {
+        const session = gameSessions.get(gameCode);
+        if (session?.host === socket.id) {
+          const clientId = session.clients.get(data.teamName);
+          if (clientId) {
+            io.to(clientId).emit('kicked');
+            session.clients.delete(data.teamName);
+            console.log('Team kicked:', data.teamName);
+
+            // Update remaining clients
             const teams = [
               { id: 1, name: session.state.teams[0].name, score: 0, roundScores: [] },
               ...Array.from(session.clients.keys()).map((name, i) => ({
@@ -84,82 +117,36 @@ export function setupWebSocket(server: Server) {
               }))
             ];
 
-            session.host.send(JSON.stringify({ 
-              type: 'teams_updated',
-              teams
-            }));
-
-            socket.send(JSON.stringify({ type: 'joined_game' }));
-            break;
-          }
-
-          case 'kick_team': {
-            const session = gameSessions.get(gameCode);
-            if (session?.host === socket) {
-              const clientSocket = session.clients.get(message.teamName);
-              if (clientSocket) {
-                clientSocket.send(JSON.stringify({ type: 'kicked' }));
-                session.clients.delete(message.teamName);
-                console.log('Team kicked:', message.teamName);
-
-                // Update remaining clients
-                const teams = [
-                  { id: 1, name: session.state.teams[0].name, score: 0, roundScores: [] },
-                  ...Array.from(session.clients.keys()).map((name, i) => ({
-                    id: i + 2,
-                    name,
-                    score: 0,
-                    roundScores: []
-                  }))
-                ];
-
-                session.host.send(JSON.stringify({ 
-                  type: 'teams_updated',
-                  teams
-                }));
-              }
-            }
-            break;
-          }
-
-          case 'start_game': {
-            const session = gameSessions.get(gameCode);
-            if (session?.host === socket) {
-              console.log('Starting game:', gameCode);
-              session.clients.forEach(client => {
-                client.send(JSON.stringify({ 
-                  type: 'game_started',
-                  state: session.state
-                }));
-              });
-            }
-            break;
+            socket.emit('teams_updated', { teams });
           }
         }
       } catch (error) {
-        console.error('WebSocket message error:', error);
-        socket.send(JSON.stringify({ 
-          type: 'error', 
-          message: 'Invalid message format' 
-        }));
+        console.error('Error kicking team:', error);
+        socket.emit('error', { message: 'Failed to kick team' });
       }
     });
 
-    socket.on('error', (error) => {
-      console.error('WebSocket error:', error);
+    socket.on('start_game', () => {
+      try {
+        const session = gameSessions.get(gameCode);
+        if (session?.host === socket.id) {
+          console.log('Starting game:', gameCode);
+          io.to(gameCode).emit('game_started', { state: session.state });
+        }
+      } catch (error) {
+        console.error('Error starting game:', error);
+        socket.emit('error', { message: 'Failed to start game' });
+      }
     });
 
-    socket.on('close', () => {
-      console.log('WebSocket connection closed');
+    socket.on('disconnect', () => {
+      console.log('Socket.IO connection closed:', socket.id);
       if (gameCode) {
         const session = gameSessions.get(gameCode);
         if (session) {
-          if (session.host === socket) {
+          if (session.host === socket.id) {
             // Host disconnected, end game
-            session.clients.forEach(client => {
-              client.send(JSON.stringify({ type: 'game_ended', reason: 'host_disconnected' }));
-              client.close();
-            });
+            io.to(gameCode).emit('game_ended', { reason: 'host_disconnected' });
             gameSessions.delete(gameCode);
             console.log('Game ended due to host disconnection:', gameCode);
           } else if (teamName) {
@@ -175,10 +162,7 @@ export function setupWebSocket(server: Server) {
                 roundScores: []
               }))
             ];
-            session.host.send(JSON.stringify({ 
-              type: 'teams_updated',
-              teams
-            }));
+            io.to(session.host).emit('teams_updated', { teams });
           }
         }
       }
