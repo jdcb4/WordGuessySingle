@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { useGameStore } from "@/lib/use-game-store";
-import { useWebSocket } from "@/lib/use-websocket";
 import { useTimer } from "@/lib/use-timer";
 import { TimerDisplay } from "@/components/timer-display";
 import { WordDisplay } from "@/components/word-display";
@@ -10,7 +9,6 @@ import { getRandomWord, getRandomCategory } from "@/lib/game-data";
 import { WordResult, Category } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
 import useSound from "use-sound";
 import { QuitGameDialog } from "@/components/quit-game-dialog";
 
@@ -25,13 +23,8 @@ export default function Game() {
     nextTeam,
     addTurnResult,
     currentRound,
-    totalRounds,
-    isGameStarted,
-    gameId,
-    isHost,
-    gameMode
+    totalRounds
   } = useGameStore();
-  const { connected, sendMessage } = useWebSocket(gameId);
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
     getRandomCategory(excludedCategories)
@@ -46,21 +39,6 @@ export default function Game() {
   const [playCorrectSound] = useSound('/correct.mp3', { volume: 0.5 });
   const [playSkipSound] = useSound('/skip.mp3', { volume: 0.5 });
 
-  // Redirect if game not started or connection lost in online mode
-  useEffect(() => {
-    if (!isGameStarted || (gameMode === 'online' && !connected)) {
-      navigate("/");
-      return;
-    }
-  }, [isGameStarted, connected, navigate, gameMode]);
-
-  // Initialize game state
-  useEffect(() => {
-    if (teams.length && currentWord === "") {
-      setCurrentWord(getRandomWord(currentCategory, usedWords));
-    }
-  }, [teams, currentWord, currentCategory, usedWords]);
-
   // Timer sound effect
   useEffect(() => {
     if (timer.timeLeft === 5 && timer.isActive) {
@@ -72,17 +50,13 @@ export default function Game() {
     }
   }, [timer.timeLeft, playTimerSound, timer.isActive]);
 
-  // Loading state
-  if (!teams.length || !isGameStarted || (gameMode === 'online' && !connected)) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span>Loading game...</span>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!teams.length) {
+      navigate("/");
+      return;
+    }
+    setCurrentWord(getRandomWord(currentCategory, usedWords));
+  }, []);
 
   const getCurrentScore = () => {
     const correctWords = results.filter(r => r.correct);
@@ -114,29 +88,15 @@ export default function Game() {
 
   const handleTurnEnd = () => {
     const team = teams[currentTeamIndex];
-    const turnResult = {
-      teamId: team.id,
-      score: getCurrentScore(),
-      words: results
-    };
-
-    // Send turn result to all players in online mode
-    if (gameMode === 'online') {
-      sendMessage({
-        type: 'end_turn',
-        payload: {
-          turnResult,
-          nextTeamIndex: (currentTeamIndex + 1) % teams.length,
-          currentRound: currentRound + ((currentTeamIndex + 1) === teams.length ? 1 : 0)
-        }
-      });
-    }
-
-    addTurnResult(turnResult);
-
     const isLastRound = currentRound === totalRounds;
     const isLastTeam = currentTeamIndex === teams.length - 1;
     const shouldEndGame = isLastRound && isLastTeam;
+
+    addTurnResult({
+      teamId: team.id,
+      score: getCurrentScore(),
+      words: results
+    });
 
     if (shouldEndGame) {
       navigate("/summary");
@@ -152,13 +112,6 @@ export default function Game() {
     }
   };
 
-  // Check if it's the current team's turn and they can interact
-  const isCurrentTeamsTurn =
-    gameMode === 'local' ||
-    (teams[currentTeamIndex] &&
-      ((isHost() && teams[currentTeamIndex].isHost) ||
-        (!isHost() && !teams[currentTeamIndex].isHost)));
-
   if (!timer.isActive && !timer.isFinished) {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center">
@@ -169,20 +122,9 @@ export default function Game() {
           <div className="text-lg text-muted-foreground">
             Category: <span className="font-medium text-primary">{currentCategory}</span>
           </div>
-          {isCurrentTeamsTurn && (
-            <Button size="lg" onClick={() => {
-              timer.start();
-              // Notify other players that the turn has started
-              if (gameMode === 'online') {
-                sendMessage({
-                  type: 'turn_started',
-                  payload: { teamId: teams[currentTeamIndex].id }
-                });
-              }
-            }}>
-              Start Turn
-            </Button>
-          )}
+          <Button size="lg" onClick={() => timer.start()}>
+            Start Turn
+          </Button>
         </div>
       </div>
     );
@@ -194,7 +136,13 @@ export default function Game() {
       <div className="flex-1 overflow-y-auto p-6 pb-96 space-y-6">
         <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
-        <WordDisplay word={currentWord} category={currentCategory} />
+        <WordDisplay
+          word={currentWord}
+          category={currentCategory}
+          onNext={handleNext}
+          onSkip={handleSkip}
+          disabled={timer.isFinished}
+        />
 
         <div className="space-y-4">
           <Card className="p-4">
@@ -240,31 +188,29 @@ export default function Game() {
           />
         </Card>
 
-        {isCurrentTeamsTurn && (
-          <div className="max-w-md mx-auto flex gap-4">
-            <Button
-              size="lg"
-              variant="default"
-              onClick={handleNext}
-              disabled={timer.isFinished}
-              className="flex-1"
-            >
-              Next
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={handleSkip}
-              disabled={timer.isFinished}
-              className="flex-1"
-            >
-              Skip
-            </Button>
-          </div>
-        )}
+        <div className="max-w-md mx-auto flex gap-4">
+          <Button
+            size="lg"
+            variant="default"
+            onClick={handleNext}
+            disabled={timer.isFinished}
+            className="flex-1"
+          >
+            Next
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            onClick={handleSkip}
+            disabled={timer.isFinished}
+            className="flex-1"
+          >
+            Skip
+          </Button>
+        </div>
       </div>
 
-      {timer.isFinished && isCurrentTeamsTurn && (
+      {timer.isFinished && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4 space-y-4">
             <h3 className="text-2xl font-bold text-center">Time's Up!</h3>

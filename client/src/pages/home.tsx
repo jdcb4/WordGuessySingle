@@ -9,10 +9,8 @@ export default function Home() {
   const [, navigate] = useLocation();
   const initializeGame = useGameStore(state => state.initializeGame);
 
-  // Handle local game creation
   const handleStart = (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number) => {
-    // Initialize local game state
-    initializeGame(teams, excludedCategories, turnDuration, totalRounds, 'local');
+    initializeGame(teams, excludedCategories, turnDuration, totalRounds);
     navigate("/game");
   };
 
@@ -22,10 +20,10 @@ export default function Home() {
       <div className="max-w-md mx-auto space-y-6">
         <div className="text-center space-y-2">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Pass and Play
+            Word Guessy
           </h1>
           <p className="text-muted-foreground">
-            A local multiplayer word guessing game
+            A fun word guessing game for teams
           </p>
         </div>
 
