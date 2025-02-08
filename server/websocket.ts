@@ -38,8 +38,20 @@ export function setupWebSocket(server: HTTPServer) {
 
   console.log('Socket.IO server initialized');
 
+  io.engine.on("connection_error", (err) => {
+    console.log('Socket.IO connection error:', err.req?.url, err.code, err.message, err.context);
+  });
+
+  io.engine.on("headers", (headers, req) => {
+    console.log('Socket.IO handshake headers:', headers);
+  });
+
   io.on('connection', (socket) => {
-    console.log('New Socket.IO connection established:', socket.id);
+    console.log('New Socket.IO connection established:', socket.id, 'Transport:', socket.conn.transport.name);
+
+    socket.conn.on("upgrade", (transport) => {
+      console.log('Socket transport upgraded:', transport.name);
+    });
 
     // Track the game code and team name for this socket
     let currentGameCode: string | null = null;
@@ -47,6 +59,7 @@ export function setupWebSocket(server: HTTPServer) {
 
     socket.on('create_game', async (data) => {
       try {
+        console.log('Creating game, socket state:', socket.connected, 'Transport:', socket.conn.transport.name);
         // Generate unique game code
         const gameCode = generateGameCode();
         currentGameCode = gameCode;
@@ -88,7 +101,6 @@ export function setupWebSocket(server: HTTPServer) {
           throw new Error('Game is full');
         }
 
-
         // Update tracking variables
         currentGameCode = code;
         currentTeamName = teamName;
@@ -122,8 +134,8 @@ export function setupWebSocket(server: HTTPServer) {
       }
     });
 
-    socket.on('disconnect', () => {
-      console.log('Socket disconnected:', socket.id);
+    socket.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', socket.id, 'Reason:', reason, 'Last transport:', socket.conn.transport?.name);
 
       if (currentGameCode) {
         const session = gameSessions.get(currentGameCode);
@@ -157,7 +169,7 @@ export function setupWebSocket(server: HTTPServer) {
 
     // Error handling
     socket.on('error', (error) => {
-      console.error('Socket error:', error);
+      console.error('Socket error for', socket.id, ':', error);
       socket.emit('error', { message: 'An unexpected error occurred' });
     });
   });
