@@ -1,11 +1,13 @@
+import { useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useWebSocket } from "@/lib/use-websocket";
+import { useToast } from "@/hooks/use-toast";
 import {
   Form,
   FormControl,
@@ -24,6 +26,8 @@ type JoinGameForm = z.infer<typeof joinGameSchema>;
 
 export default function JoinGame() {
   const [, navigate] = useLocation();
+  const ws = useWebSocket();
+  const { toast } = useToast();
 
   const form = useForm<JoinGameForm>({
     resolver: zodResolver(joinGameSchema),
@@ -33,9 +37,48 @@ export default function JoinGame() {
     },
   });
 
+  useEffect(() => {
+    ws.connect();
+
+    ws.on('joined_game', () => {
+      toast({
+        title: "Success",
+        description: "Successfully joined the game. Waiting for host to start...",
+      });
+    });
+
+    ws.on('game_started', () => {
+      navigate("/game");
+    });
+
+    ws.on('error', (data) => {
+      toast({
+        title: "Error",
+        description: data.message,
+        variant: "destructive"
+      });
+    });
+
+    ws.on('kicked', () => {
+      toast({
+        title: "Kicked",
+        description: "You have been removed from the game by the host.",
+        variant: "destructive"
+      });
+      navigate("/online-game");
+    });
+
+    return () => {
+      ws.socket?.close();
+    };
+  }, [ws, navigate, toast]);
+
   const onSubmit = (data: JoinGameForm) => {
-    // TODO: Implement WebSocket connection and game joining logic
-    console.log("Joining game with data:", data);
+    ws.send({
+      type: 'join_game',
+      code: data.gameCode.toUpperCase(),
+      teamName: data.teamName
+    });
   };
 
   return (
@@ -64,6 +107,7 @@ export default function JoinGame() {
                         {...field}
                         placeholder="Enter game code"
                         className="uppercase"
+                        onChange={e => field.onChange(e.target.value.toUpperCase())}
                       />
                     </FormControl>
                     <FormMessage />

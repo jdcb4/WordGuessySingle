@@ -1,6 +1,8 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { setupWebSocket } from "./websocket";
+import { createServer } from "http";
 
 const app = express();
 app.use(express.json());
@@ -37,7 +39,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  const server = registerRoutes(app);
+  // Create HTTP server first
+  const server = createServer(app);
+
+  // Setup WebSocket server before routes
+  setupWebSocket(server);
+
+  // Register routes after WebSocket setup
+  registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

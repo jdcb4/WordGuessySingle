@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,38 +6,80 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { CategorySelect } from "@/components/category-select";
 import { TURN_DURATIONS, ROUND_OPTIONS, Team } from "@shared/schema";
+import { useWebSocket } from "@/lib/use-websocket";
+import { useToast } from "@/hooks/use-toast";
 
 export default function HostGame() {
   const [, navigate] = useLocation();
   const [teamName, setTeamName] = useState("");
   const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
-  const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
+  const [turnDuration, setTurnDuration] = useState<number>(30); // Default to 30 seconds
   const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
   const [isWaitingRoom, setIsWaitingRoom] = useState(false);
-  const [gameCode] = useState("ABCD123"); // TODO: Generate this from server
-  const [joinedTeams, setJoinedTeams] = useState<Team[]>([]); // Will be populated via WebSocket
+  const [gameCode, setGameCode] = useState("");
+  const [joinedTeams, setJoinedTeams] = useState<Team[]>([]);
+  const ws = useWebSocket();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    ws.connect();
+
+    ws.on('game_created', (data) => {
+      setGameCode(data.code);
+      setIsWaitingRoom(true);
+    });
+
+    ws.on('teams_updated', (data) => {
+      setJoinedTeams(data.teams);
+    });
+
+    ws.on('error', (data) => {
+      toast({
+        title: "Error",
+        description: data.message,
+        variant: "destructive"
+      });
+    });
+
+    return () => {
+      ws.socket?.close();
+    };
+  }, [ws]);
 
   const handleCreateGame = () => {
     if (!teamName) return;
-    
-    // TODO: Setup WebSocket connection and create game
-    const hostTeam: Team = {
-      id: 1,
-      name: teamName,
-      score: 0,
-      roundScores: []
+
+    const initialState = {
+      teams: [{
+        id: 1,
+        name: teamName,
+        score: 0,
+        roundScores: []
+      }],
+      currentRound: 1,
+      totalRounds,
+      currentTeamIndex: 0,
+      excludedCategories,
+      isGameStarted: false,
+      isGameOver: false,
+      turnDuration
     };
-    setJoinedTeams([hostTeam]);
-    setIsWaitingRoom(true);
+
+    ws.send({
+      type: 'create_game',
+      state: initialState
+    });
   };
 
-  const handleKickTeam = (teamId: number) => {
-    // TODO: Implement kick functionality via WebSocket
-    setJoinedTeams(teams => teams.filter(t => t.id !== teamId));
+  const handleKickTeam = (teamName: string) => {
+    ws.send({
+      type: 'kick_team',
+      teamName
+    });
   };
 
   const handleStartGame = () => {
-    // TODO: Implement game start via WebSocket
+    ws.send({ type: 'start_game' });
     navigate("/game");
   };
 
@@ -66,11 +108,11 @@ export default function HostGame() {
                   className="flex items-center justify-between py-2"
                 >
                   <span>{team.name}</span>
-                  {team.id !== 1 && ( // Don't allow kicking the host
+                  {team.id !== 1 && (
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => handleKickTeam(team.id)}
+                      onClick={() => handleKickTeam(team.name)}
                     >
                       Kick
                     </Button>
