@@ -15,7 +15,7 @@ export function useWebSocket() {
       return;
     }
 
-    // Initialize socket with more robust configuration
+    // Initialize socket with robust configuration
     const socket = io({
       path: '/socket.io',
       transports: ['websocket', 'polling'],
@@ -23,23 +23,16 @@ export function useWebSocket() {
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
-      timeout: 20000,
-      autoConnect: true
+      timeout: 60000,
+      autoConnect: false
     });
 
     socketRef.current = socket;
-    console.log('Connecting to Socket.IO server...');
+    console.log('Initializing Socket.IO connection...');
 
-    // Register event handlers for all existing message types
-    handlersRef.current.forEach((handlers, type) => {
-      socket.on(type, (data) => {
-        console.log('Received Socket.IO message:', { type, data });
-        handlers.forEach(handler => handler(data));
-      });
-    });
-
+    // Connection event handlers
     socket.on('connect', () => {
-      console.log('Socket.IO connection established');
+      console.log('Socket.IO connected:', socket.id);
       toast({
         title: "Connected",
         description: "Successfully connected to the game server",
@@ -50,17 +43,19 @@ export function useWebSocket() {
       console.error('Socket.IO connection error:', error);
       toast({
         title: "Connection Error",
-        description: "Failed to connect to game server",
+        description: `Failed to connect: ${error.message}`,
         variant: "destructive",
       });
     });
 
     socket.on('disconnect', (reason) => {
       console.log('Socket.IO disconnected:', reason);
+
       if (reason === 'io server disconnect') {
         // Reconnect if the server initiated the disconnect
         socket.connect();
       }
+
       toast({
         title: "Disconnected",
         description: `Connection lost: ${reason}`,
@@ -72,10 +67,27 @@ export function useWebSocket() {
       console.error('Socket.IO error:', error);
       toast({
         title: "Error",
-        description: "An error occurred with the game connection",
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     });
+
+    // Register existing message handlers
+    handlersRef.current.forEach((handlers, type) => {
+      socket.on(type, (data) => {
+        console.log(`Received ${type}:`, data);
+        handlers.forEach(handler => {
+          try {
+            handler(data);
+          } catch (error) {
+            console.error(`Error in ${type} handler:`, error);
+          }
+        });
+      });
+    });
+
+    // Start connection
+    socket.connect();
 
     return () => {
       if (socket.connected) {
@@ -86,7 +98,8 @@ export function useWebSocket() {
   }, [toast]);
 
   const send = useCallback((data: { type: string; [key: string]: any }) => {
-    if (!socketRef.current?.connected) {
+    const socket = socketRef.current;
+    if (!socket?.connected) {
       console.error('Socket.IO is not connected');
       toast({
         title: "Connection Error",
@@ -97,12 +110,12 @@ export function useWebSocket() {
     }
 
     const { type, ...payload } = data;
-    console.log('Sending Socket.IO message:', { type, payload });
+    console.log(`Sending ${type}:`, payload);
 
     try {
-      socketRef.current.emit(type, payload);
+      socket.emit(type, payload);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error(`Error sending ${type}:`, error);
       toast({
         title: "Error",
         description: "Failed to send message to server",
@@ -115,22 +128,25 @@ export function useWebSocket() {
     const handlers = handlersRef.current.get(type) || [];
     handlers.push(handler);
     handlersRef.current.set(type, handlers);
-    console.log(`Registered handler for message type: ${type}`);
+    console.log(`Registered handler for: ${type}`);
 
-    // If socket exists, register the handler immediately
-    if (socketRef.current) {
-      socketRef.current.on(type, (data) => {
-        console.log('Received Socket.IO message:', { type, data });
-        handler(data);
+    const socket = socketRef.current;
+    if (socket) {
+      socket.on(type, (data) => {
+        console.log(`Received ${type}:`, data);
+        try {
+          handler(data);
+        } catch (error) {
+          console.error(`Error in ${type} handler:`, error);
+        }
       });
     }
 
     return () => {
       const handlers = handlersRef.current.get(type) || [];
       handlersRef.current.set(type, handlers.filter(h => h !== handler));
-      console.log(`Unregistered handler for message type: ${type}`);
+      console.log(`Unregistered handler for: ${type}`);
 
-      // Remove handler from socket if it exists
       if (socketRef.current) {
         socketRef.current.off(type);
       }
@@ -139,12 +155,12 @@ export function useWebSocket() {
 
   useEffect(() => {
     const cleanup = connect();
-
     return () => {
-      cleanup();
-      if (socketRef.current?.connected) {
+      cleanup?.();
+      const socket = socketRef.current;
+      if (socket?.connected) {
         console.log('Cleaning up Socket.IO connection');
-        socketRef.current.disconnect();
+        socket.disconnect();
       }
     };
   }, [connect]);
