@@ -24,7 +24,7 @@ export default function Game() {
     nextTeam,
     addTurnResult,
     currentRound,
-    totalRounds // Ensure we're getting totalRounds from the store
+    totalRounds
   } = useGameStore();
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
