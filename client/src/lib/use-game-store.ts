@@ -59,8 +59,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const isRoundComplete = nextIndex === 0;
     const nextRound = isRoundComplete ? state.currentRound + 1 : state.currentRound;
 
-    // Game should end when we complete the last round
-    const shouldEndGame = nextRound > state.totalRounds;
+    // Game should end when we complete the last round and last team
+    const isLastRound = nextRound > state.totalRounds;
+    const shouldEndGame = isLastRound && nextIndex === 0;
 
     return {
       currentTeamIndex: shouldEndGame ? state.currentTeamIndex : nextIndex,
