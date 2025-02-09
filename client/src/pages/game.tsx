@@ -89,6 +89,9 @@ export default function Game() {
 
   const handleTurnEnd = () => {
     const team = teams[currentTeamIndex];
+    const isLastRound = currentRound === totalRounds;
+    const isLastTeam = currentTeamIndex === teams.length - 1;
+    const shouldEndGame = isLastRound && isLastTeam;
 
     addTurnResult({
       teamId: team.id,
@@ -96,12 +99,10 @@ export default function Game() {
       words: results
     });
 
-    nextTeam();
-
-    // After nextTeam, check if game is over
-    if (isGameOver) {
+    if (shouldEndGame) {
       navigate("/summary");
     } else {
+      nextTeam();
       timer.reset();
       setResults([]);
       setSkipsUsed(0);
