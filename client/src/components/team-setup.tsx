@@ -22,7 +22,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
   const [includedCategories, setIncludedCategories] = useState<string[]>(["Things", "Places", "Food & Drink", "Hobbies", "Entertainment", "People"]);
-  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(["Easy"]);
+  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(["Easy", "Medium"]);
   const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
   const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
 
@@ -118,8 +118,8 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
         onClick={handleStart}
         disabled={includedCategories.length === 0}
       >
-        {includedCategories.length === 0 
-          ? "Please select at least one category" 
+        {includedCategories.length === 0
+          ? "Please select at least one category"
           : "Start Game"}
       </Button>
     </Card>
