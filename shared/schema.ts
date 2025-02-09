@@ -40,8 +40,8 @@ export const CATEGORIES = [
   "Nature",
   "Thing",
   "Person",
-  "Random",
-  "Place"
+  "Place",
+  "Food & Drink"
 ] as const;
 
 export const DIFFICULTIES = [
