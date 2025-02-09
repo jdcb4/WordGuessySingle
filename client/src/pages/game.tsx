@@ -93,6 +93,9 @@ export default function Game() {
     const isLastTeam = currentTeamIndex === teams.length - 1;
     const shouldEndGame = isLastRound && isLastTeam;
 
+    console.log('End Turn - Current Round:', currentRound, 'Total Rounds:', totalRounds);
+    console.log('Last Round?', isLastRound, 'Last Team?', isLastTeam, 'Should End?', shouldEndGame);
+
     addTurnResult({
       teamId: team.id,
       score: getCurrentScore(),

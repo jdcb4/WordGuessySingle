@@ -36,6 +36,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       score: 0,
       roundScores: []
     }));
+    console.log('Starting game with total rounds:', totalRounds);
     onStart(teams, includedCategories, selectedDifficulties, turnDuration, totalRounds);
   };
 
