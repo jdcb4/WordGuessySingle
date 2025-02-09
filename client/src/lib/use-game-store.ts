@@ -64,6 +64,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const shouldEndGame = isLastRound && nextIndex === 0;
 
     return {
+      ...state, // Preserve existing state
       currentTeamIndex: shouldEndGame ? state.currentTeamIndex : nextIndex,
       currentRound: nextRound,
       isGameOver: shouldEndGame

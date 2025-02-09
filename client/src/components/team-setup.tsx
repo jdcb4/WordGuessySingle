@@ -14,15 +14,25 @@ interface TeamSetupProps {
     includedCategories: string[],
     selectedDifficulties: string[],
     turnDuration: number,
-    totalRounds: number
+    totalRounds: number,
   ) => void;
 }
 
 export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
-  const [includedCategories, setIncludedCategories] = useState<string[]>(["Things", "Places", "Food & Drink", "Hobbies", "Entertainment", "People"]);
-  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(["Easy", "Medium"]);
+  const [includedCategories, setIncludedCategories] = useState<string[]>([
+    "Things",
+    "Places",
+    "Food & Drink",
+    "Hobbies",
+    "Entertainment",
+    "People",
+  ]);
+  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([
+    "Easy",
+    "Medium",
+  ]);
   const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
   const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
 
@@ -34,10 +44,16 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       id: i + 1,
       name: teamNames[i] || `Team ${i + 1}`,
       score: 0,
-      roundScores: []
+      roundScores: [],
     }));
-    console.log('Starting game with total rounds:', totalRounds);
-    onStart(teams, includedCategories, selectedDifficulties, turnDuration, totalRounds);
+    console.log("Starting game with total rounds:", totalRounds);
+    onStart(
+      teams,
+      includedCategories,
+      selectedDifficulties,
+      turnDuration,
+      totalRounds,
+    );
   };
 
   return (
@@ -45,7 +61,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       <div className="space-y-2">
         <Label>Number of Teams</Label>
         <div className="flex gap-2">
-          {[1, 2, 3, 4].map(num => (
+          {[1, 2, 3, 4].map((num) => (
             <Button
               key={num}
               variant={teamCount === num ? "default" : "outline"}
@@ -73,7 +89,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       <div className="space-y-2">
         <Label>Turn Duration (seconds)</Label>
         <div className="flex gap-2">
-          {TURN_DURATIONS.map(duration => (
+          {TURN_DURATIONS.map((duration) => (
             <Button
               key={duration}
               variant={turnDuration === duration ? "default" : "outline"}
@@ -92,7 +108,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
             <Label>Team {i + 1} Name</Label>
             <Input
               value={teamNames[i]}
-              onChange={e => {
+              onChange={(e) => {
                 const newNames = [...teamNames];
                 newNames[i] = e.target.value;
                 setTeamNames(newNames);
