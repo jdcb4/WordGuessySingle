@@ -78,7 +78,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
         <Label>Number of Rounds: {totalRounds}</Label>
         <Slider
           value={[totalRounds]}
-          onValueChange={(value) => setTotalRounds(value[0])}
+          onValueChange={(value) => setTotalRounds(Number(value[0]))}
           min={1}
           max={10}
           step={1}
