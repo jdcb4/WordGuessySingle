@@ -10,49 +10,29 @@ import { DifficultySelect } from "./difficulty-select";
 interface TeamSetupProps {
   onStart: (
     teams: Team[],
-    includedCategories: string[],
+    excludedCategories: string[],
     selectedDifficulties: string[],
     turnDuration: number,
-    totalRounds: number,
+    totalRounds: number
   ) => void;
 }
 
 export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
-  const [includedCategories, setIncludedCategories] = useState<string[]>([
-    "Things",
-    "Places",
-    "Food & Drink",
-    "Hobbies",
-    "Entertainment",
-    "People",
-  ]);
-  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>([
-    "Easy",
-    "Medium",
-  ]);
+  const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
+  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(["Easy"]);
   const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
   const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
 
   const handleStart = () => {
-    if (includedCategories.length === 0) {
-      return; // Prevent starting if no categories selected
-    }
     const teams: Team[] = Array.from({ length: teamCount }, (_, i) => ({
       id: i + 1,
       name: teamNames[i] || `Team ${i + 1}`,
       score: 0,
-      roundScores: [],
+      roundScores: []
     }));
-    console.log("Starting game with total rounds:", totalRounds);
-    onStart(
-      teams,
-      includedCategories,
-      selectedDifficulties,
-      turnDuration,
-      totalRounds
-    );
+    onStart(teams, excludedCategories, selectedDifficulties, turnDuration, totalRounds);
   };
 
   return (
@@ -60,7 +40,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       <div className="space-y-2">
         <Label>Number of Teams</Label>
         <div className="flex gap-2">
-          {[1, 2, 3, 4].map((num) => (
+          {[1, 2, 3, 4].map(num => (
             <Button
               key={num}
               variant={teamCount === num ? "default" : "outline"}
@@ -75,15 +55,15 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
 
       <div className="space-y-2">
         <Label>Number of Rounds</Label>
-        <div className="flex flex-wrap gap-2">
-          {ROUND_OPTIONS.map((count) => (
+        <div className="grid grid-cols-5 gap-2">
+          {ROUND_OPTIONS.map(num => (
             <Button
-              key={count}
-              variant={totalRounds === count ? "default" : "outline"}
-              onClick={() => setTotalRounds(count)}
+              key={num}
+              variant={totalRounds === num ? "default" : "outline"}
+              onClick={() => setTotalRounds(num)}
               className="flex-1"
             >
-              {count}
+              {num}
             </Button>
           ))}
         </div>
@@ -92,7 +72,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       <div className="space-y-2">
         <Label>Turn Duration (seconds)</Label>
         <div className="flex gap-2">
-          {TURN_DURATIONS.map((duration) => (
+          {TURN_DURATIONS.map(duration => (
             <Button
               key={duration}
               variant={turnDuration === duration ? "default" : "outline"}
@@ -111,7 +91,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
             <Label>Team {i + 1} Name</Label>
             <Input
               value={teamNames[i]}
-              onChange={(e) => {
+              onChange={e => {
                 const newNames = [...teamNames];
                 newNames[i] = e.target.value;
                 setTeamNames(newNames);
@@ -128,19 +108,16 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       />
 
       <CategorySelect
-        includedCategories={includedCategories}
-        onChange={setIncludedCategories}
+        excludedCategories={excludedCategories}
+        onChange={setExcludedCategories}
       />
 
       <Button
         size="lg"
         className="w-full"
         onClick={handleStart}
-        disabled={includedCategories.length === 0}
       >
-        {includedCategories.length === 0
-          ? "Please select at least one category"
-          : "Start Game"}
+        Start Game
       </Button>
     </Card>
   );

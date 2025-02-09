@@ -34,8 +34,9 @@ export const getRandomWord = (
   return availableWords[Math.floor(Math.random() * availableWords.length)];
 };
 
-export const getRandomCategory = (includedCategories: string[]): Category => {
-  // Only select from included categories
-  const availableCategories = includedCategories as Category[];
+export const getRandomCategory = (excludedCategories: string[]): Category => {
+  const availableCategories = Object.keys(wordsByCategory).filter(
+    cat => !excludedCategories.includes(cat)
+  ) as Category[];
   return availableCategories[Math.floor(Math.random() * availableCategories.length)];
 };

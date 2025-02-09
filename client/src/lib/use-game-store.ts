@@ -32,30 +32,18 @@ const initialState: GameState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  initializeGame: (teams, excludedCategories, selectedDifficulties, turnDuration, totalRounds) => {
-    console.log('Initializing game with totalRounds:', totalRounds);
-    set({
-      teams,
-      excludedCategories,
-      selectedDifficulties,
-      turnDuration,
-      totalRounds,
-      currentRound: 1,
-      currentTeamIndex: 0,
-      isGameStarted: true,
-      isGameOver: false
-    });
-
-    // Verify state was set correctly
-    const state = get();
-    console.log('Game state after initialization:', {
-      totalRounds: state.totalRounds,
-      currentRound: state.currentRound
-    });
-  },
+  initializeGame: (teams, excludedCategories, selectedDifficulties, turnDuration, totalRounds) => set({
+    teams,
+    excludedCategories,
+    selectedDifficulties,
+    turnDuration,
+    totalRounds,
+    isGameStarted: true,
+    currentRound: 1,
+    currentTeamIndex: 0
+  }),
 
   updateTeamScore: (teamId, points) => set(state => ({
-    ...state,
     teams: state.teams.map(team =>
       team.id === teamId ? {
         ...team,
@@ -66,54 +54,33 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
 
   nextTeam: () => set(state => {
-    console.log('Current state in nextTeam:', {
-      currentRound: state.currentRound,
-      totalRounds: state.totalRounds,
-      teams: state.teams.length
-    });
-
+    // Calculate next team index
     const nextIndex = (state.currentTeamIndex + 1) % state.teams.length;
     const isRoundComplete = nextIndex === 0;
     const nextRound = isRoundComplete ? state.currentRound + 1 : state.currentRound;
 
+    // Check if game should end based on new state
     const isLastRound = nextRound > state.totalRounds;
-    const shouldEndGame = isLastRound && nextIndex === 0;
-
-    console.log('Calculated values:', {
-      nextIndex,
-      isRoundComplete,
-      nextRound,
-      isLastRound,
-      shouldEndGame
-    });
 
     return {
-      ...state,
-      currentTeamIndex: shouldEndGame ? state.currentTeamIndex : nextIndex,
+      currentTeamIndex: isLastRound ? state.currentTeamIndex : nextIndex,
       currentRound: nextRound,
-      isGameOver: shouldEndGame
+      isGameOver: isLastRound
     };
   }),
 
   nextRound: () => set(state => ({
-    ...state,
     currentRound: state.currentRound + 1,
     currentTeamIndex: 0
   })),
 
-  endGame: () => set(state => ({ ...state, isGameOver: true })),
+  endGame: () => set({ isGameOver: true }),
 
   addTurnResult: (result) => {
     const state = get();
-    console.log('Current game state in addTurnResult:', {
-      totalRounds: state.totalRounds,
-      currentRound: state.currentRound
-    });
-
     const team = state.teams.find(t => t.id === result.teamId);
     if (team) {
       set(state => ({
-        ...state,
         teams: state.teams.map(t =>
           t.id === result.teamId ? {
             ...t,

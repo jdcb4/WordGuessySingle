@@ -1,5 +1,5 @@
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DIFFICULTIES } from "@shared/schema";
 
 interface DifficultySelectProps {
@@ -9,27 +9,32 @@ interface DifficultySelectProps {
 
 export function DifficultySelect({ selectedDifficulties, onChange }: DifficultySelectProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <Label>Word Difficulty</Label>
-      <div className="flex gap-2">
+      <div className="grid grid-cols-3 gap-4">
         {DIFFICULTIES.map(difficulty => (
-          <Button
-            key={difficulty}
-            variant={selectedDifficulties.includes(difficulty) ? "default" : "outline"}
-            onClick={() => {
-              if (selectedDifficulties.includes(difficulty)) {
-                // Don't allow unchecking if it's the last selected difficulty
-                if (selectedDifficulties.length > 1) {
-                  onChange(selectedDifficulties.filter(d => d !== difficulty));
+          <div key={difficulty} className="flex items-center space-x-2">
+            <Checkbox
+              id={difficulty}
+              checked={selectedDifficulties.includes(difficulty)}
+              onCheckedChange={(checked) => {
+                if (checked) {
+                  onChange([...selectedDifficulties, difficulty]);
+                } else {
+                  // Don't allow unchecking if it's the last selected difficulty
+                  if (selectedDifficulties.length > 1) {
+                    onChange(selectedDifficulties.filter(d => d !== difficulty));
+                  }
                 }
-              } else {
-                onChange([...selectedDifficulties, difficulty]);
-              }
-            }}
-            className="flex-1"
-          >
-            {difficulty}
-          </Button>
+              }}
+            />
+            <label
+              htmlFor={difficulty}
+              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            >
+              {difficulty}
+            </label>
+          </div>
         ))}
       </div>
     </div>
