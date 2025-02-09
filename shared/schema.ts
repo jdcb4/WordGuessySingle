@@ -36,12 +36,12 @@ export type TurnResult = {
 
 // Game constants
 export const CATEGORIES = [
-  "Action",
-  "Nature",
-  "Thing",
-  "Person",
-  "Place",
-  "Food & Drink"
+  "Things",
+  "Places",
+  "Food & Drink",
+  "Hobbies",
+  "Entertainment",
+  "People"
 ] as const;
 
 export const DIFFICULTIES = [

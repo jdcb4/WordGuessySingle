@@ -3,12 +3,12 @@ import wordsData from "../../../attached_assets/words.json";
 
 // Create a map to store words by category and difficulty
 const wordsByCategory: Record<Category, Record<Difficulty, string[]>> = {
-  Action: { Easy: [], Medium: [], Hard: [] },
-  Nature: { Easy: [], Medium: [], Hard: [] },
-  Thing: { Easy: [], Medium: [], Hard: [] },
-  Person: { Easy: [], Medium: [], Hard: [] },
-  Random: { Easy: [], Medium: [], Hard: [] },
-  Place: { Easy: [], Medium: [], Hard: [] }
+  Things: { Easy: [], Medium: [], Hard: [] },
+  Places: { Easy: [], Medium: [], Hard: [] },
+  "Food & Drink": { Easy: [], Medium: [], Hard: [] },
+  Hobbies: { Easy: [], Medium: [], Hard: [] },
+  Entertainment: { Easy: [], Medium: [], Hard: [] },
+  People: { Easy: [], Medium: [], Hard: [] }
 };
 
 // Populate categories from JSON data
@@ -17,15 +17,6 @@ wordsData.forEach(item => {
   const difficulty = item.difficulty as Difficulty;
   if (wordsByCategory[category] && wordsByCategory[category][difficulty]) {
     wordsByCategory[category][difficulty].push(item.word);
-  }
-});
-
-// Populate Random category with words from all other categories
-Object.entries(wordsByCategory).forEach(([category, difficultyMap]) => {
-  if (category !== "Random") {
-    Object.entries(difficultyMap).forEach(([difficulty, words]) => {
-      wordsByCategory.Random[difficulty as Difficulty].push(...words);
-    });
   }
 });
 
