@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
 import { Team, TURN_DURATIONS, ROUND_OPTIONS } from "@shared/schema";
 import { CategorySelect } from "./category-select";
 import { DifficultySelect } from "./difficulty-select";
@@ -10,7 +11,7 @@ import { DifficultySelect } from "./difficulty-select";
 interface TeamSetupProps {
   onStart: (
     teams: Team[],
-    excludedCategories: string[],
+    includedCategories: string[],
     selectedDifficulties: string[],
     turnDuration: number,
     totalRounds: number
@@ -20,19 +21,22 @@ interface TeamSetupProps {
 export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
-  const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
+  const [includedCategories, setIncludedCategories] = useState<string[]>(["Things", "Places", "Food & Drink", "Hobbies", "Entertainment", "People"]);
   const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(["Easy"]);
   const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
   const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
 
   const handleStart = () => {
+    if (includedCategories.length === 0) {
+      return; // Prevent starting if no categories selected
+    }
     const teams: Team[] = Array.from({ length: teamCount }, (_, i) => ({
       id: i + 1,
       name: teamNames[i] || `Team ${i + 1}`,
       score: 0,
       roundScores: []
     }));
-    onStart(teams, excludedCategories, selectedDifficulties, turnDuration, totalRounds);
+    onStart(teams, includedCategories, selectedDifficulties, turnDuration, totalRounds);
   };
 
   return (
@@ -53,20 +57,16 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label>Number of Rounds</Label>
-        <div className="grid grid-cols-5 gap-2">
-          {ROUND_OPTIONS.map(num => (
-            <Button
-              key={num}
-              variant={totalRounds === num ? "default" : "outline"}
-              onClick={() => setTotalRounds(num)}
-              className="flex-1"
-            >
-              {num}
-            </Button>
-          ))}
-        </div>
+      <div className="space-y-4">
+        <Label>Number of Rounds: {totalRounds}</Label>
+        <Slider
+          value={[totalRounds]}
+          onValueChange={(value) => setTotalRounds(value[0])}
+          min={1}
+          max={10}
+          step={1}
+          className="my-4"
+        />
       </div>
 
       <div className="space-y-2">
@@ -108,16 +108,19 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       />
 
       <CategorySelect
-        excludedCategories={excludedCategories}
-        onChange={setExcludedCategories}
+        includedCategories={includedCategories}
+        onChange={setIncludedCategories}
       />
 
       <Button
         size="lg"
         className="w-full"
         onClick={handleStart}
+        disabled={includedCategories.length === 0}
       >
-        Start Game
+        {includedCategories.length === 0 
+          ? "Please select at least one category" 
+          : "Start Game"}
       </Button>
     </Card>
   );
