@@ -34,18 +34,18 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   initializeGame: (teams, excludedCategories, selectedDifficulties, turnDuration, totalRounds) => {
     console.log('Initializing game with totalRounds:', totalRounds);
-    // Spread the initial state first, then override with new values
-    set(state => ({
-      ...initialState,
+    set({
       teams,
       excludedCategories,
       selectedDifficulties,
       turnDuration,
       totalRounds,
-      isGameStarted: true,
       currentRound: 1,
-      currentTeamIndex: 0
-    }));
+      currentTeamIndex: 0,
+      isGameStarted: true,
+      isGameOver: false
+    });
+
     // Verify state was set correctly
     const state = get();
     console.log('Game state after initialization:', {
@@ -79,21 +79,20 @@ export const useGameStore = create<GameStore>((set, get) => ({
     const isLastRound = nextRound > state.totalRounds;
     const shouldEndGame = isLastRound && nextIndex === 0;
 
-    const newState = {
+    console.log('Calculated values:', {
+      nextIndex,
+      isRoundComplete,
+      nextRound,
+      isLastRound,
+      shouldEndGame
+    });
+
+    return {
       ...state,
       currentTeamIndex: shouldEndGame ? state.currentTeamIndex : nextIndex,
       currentRound: nextRound,
       isGameOver: shouldEndGame
     };
-
-    console.log('New state after nextTeam:', {
-      currentRound: newState.currentRound,
-      totalRounds: newState.totalRounds,
-      currentTeamIndex: newState.currentTeamIndex,
-      isGameOver: newState.isGameOver
-    });
-
-    return newState;
   }),
 
   nextRound: () => set(state => ({
