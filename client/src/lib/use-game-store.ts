@@ -34,7 +34,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   initializeGame: (teams, excludedCategories, selectedDifficulties, turnDuration, totalRounds) => {
     console.log('Initializing game with totalRounds:', totalRounds);
-    set({
+    // Spread the initial state first, then override with new values
+    set(state => ({
+      ...initialState,
       teams,
       excludedCategories,
       selectedDifficulties,
@@ -43,7 +45,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       isGameStarted: true,
       currentRound: 1,
       currentTeamIndex: 0
-    });
+    }));
     // Verify state was set correctly
     const state = get();
     console.log('Game state after initialization:', {
@@ -53,6 +55,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   },
 
   updateTeamScore: (teamId, points) => set(state => ({
+    ...state,
     teams: state.teams.map(team =>
       team.id === teamId ? {
         ...team,
