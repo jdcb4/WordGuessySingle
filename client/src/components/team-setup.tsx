@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Slider } from "@/components/ui/slider";
 import { Team, TURN_DURATIONS, ROUND_OPTIONS } from "@shared/schema";
 import { CategorySelect } from "./category-select";
 import { DifficultySelect } from "./difficulty-select";
@@ -74,16 +73,20 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
         </div>
       </div>
 
-      <div className="space-y-4">
-        <Label>Number of Rounds: {totalRounds}</Label>
-        <Slider
-          value={[totalRounds]}
-          onValueChange={(value) => setTotalRounds(value[0])}
-          min={1}
-          max={10}
-          step={1}
-          className="my-4"
-        />
+      <div className="space-y-2">
+        <Label>Number of Rounds</Label>
+        <div className="flex flex-wrap gap-2">
+          {ROUND_OPTIONS.map((count) => (
+            <Button
+              key={count}
+              variant={totalRounds === count ? "default" : "outline"}
+              onClick={() => setTotalRounds(count)}
+              className="flex-1"
+            >
+              {count}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-2">
