@@ -24,11 +24,16 @@ export default function Game() {
     nextTeam,
     addTurnResult,
     currentRound,
-    totalRounds
+    totalRounds,
   } = useGameStore();
 
+  // Debug log when component mounts
+  useEffect(() => {
+    console.log('Game component mounted with totalRounds:', totalRounds);
+  }, []);
+
   const [currentCategory, setCurrentCategory] = useState<Category>(
-    getRandomCategory(excludedCategories)
+    getRandomCategory(excludedCategories),
   );
   const [usedWords] = useState<Set<string>>(new Set());
   const [currentWord, setCurrentWord] = useState("");
@@ -36,9 +41,9 @@ export default function Game() {
   const [skipsUsed, setSkipsUsed] = useState(0);
 
   const timer = useTimer(turnDuration);
-  const [playTimerSound] = useSound('/timer-beep.mp3', { volume: 0.5 });
-  const [playCorrectSound] = useSound('/correct.mp3', { volume: 0.5 });
-  const [playSkipSound] = useSound('/skip.mp3', { volume: 0.5 });
+  const [playTimerSound] = useSound("/timer-beep.mp3", { volume: 0.5 });
+  const [playCorrectSound] = useSound("/correct.mp3", { volume: 0.5 });
+  const [playSkipSound] = useSound("/skip.mp3", { volume: 0.5 });
 
   // Timer sound effect
   useEffect(() => {
@@ -46,7 +51,7 @@ export default function Game() {
       try {
         playTimerSound();
       } catch (error) {
-        console.error('Error playing timer sound:', error);
+        console.error("Error playing timer sound:", error);
       }
     }
   }, [timer.timeLeft, playTimerSound, timer.isActive]);
@@ -56,11 +61,13 @@ export default function Game() {
       navigate("/");
       return;
     }
-    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
+    setCurrentWord(
+      getRandomWord(currentCategory, selectedDifficulties, usedWords),
+    );
   }, []);
 
   const getCurrentScore = () => {
-    const correctWords = results.filter(r => r.correct);
+    const correctWords = results.filter((r) => r.correct);
     return correctWords.length - Math.max(0, skipsUsed - 1);
   };
 
@@ -68,23 +75,34 @@ export default function Game() {
     try {
       playCorrectSound();
     } catch (error) {
-      console.error('Error playing correct sound:', error);
+      console.error("Error playing correct sound:", error);
     }
     usedWords.add(currentWord);
-    setResults([...results, { word: currentWord, category: currentCategory, correct: true }]);
-    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
+    setResults([
+      ...results,
+      { word: currentWord, category: currentCategory, correct: true },
+    ]);
+    setCurrentWord(
+      getRandomWord(currentCategory, selectedDifficulties, usedWords),
+    );
+    console.log("Clicked next - totalrounds:", totalRounds);
   };
 
   const handleSkip = () => {
     try {
       playSkipSound();
     } catch (error) {
-      console.error('Error playing skip sound:', error);
+      console.error("Error playing skip sound:", error);
     }
     usedWords.add(currentWord);
-    setResults([...results, { word: currentWord, category: currentCategory, correct: false }]);
+    setResults([
+      ...results,
+      { word: currentWord, category: currentCategory, correct: false },
+    ]);
     setSkipsUsed(skipsUsed + 1);
-    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
+    setCurrentWord(
+      getRandomWord(currentCategory, selectedDifficulties, usedWords),
+    );
   };
 
   const handleTurnEnd = () => {
@@ -93,13 +111,27 @@ export default function Game() {
     const isLastTeam = currentTeamIndex === teams.length - 1;
     const shouldEndGame = isLastRound && isLastTeam;
 
-    console.log('End Turn - Current Round:', currentRound, 'Total Rounds:', totalRounds);
-    console.log('Last Round?', isLastRound, 'Last Team?', isLastTeam, 'Should End?', shouldEndGame);
+    console.log(
+      "End Turn - Current Round:",
+      currentRound,
+      "Total Rounds:",
+      totalRounds,
+      "Teams Length:",
+      teams.length
+    );
+    console.log(
+      "Last Round?",
+      isLastRound,
+      "Last Team?",
+      isLastTeam,
+      "Should End?",
+      shouldEndGame,
+    );
 
     addTurnResult({
       teamId: team.id,
       score: getCurrentScore(),
-      words: results
+      words: results,
     });
 
     if (shouldEndGame) {
@@ -111,7 +143,9 @@ export default function Game() {
       setSkipsUsed(0);
       const newCategory = getRandomCategory(excludedCategories);
       setCurrentCategory(newCategory);
-      setCurrentWord(getRandomWord(newCategory, selectedDifficulties, new Set()));
+      setCurrentWord(
+        getRandomWord(newCategory, selectedDifficulties, new Set()),
+      );
       usedWords.clear();
     }
   };
@@ -124,7 +158,8 @@ export default function Game() {
             {teams[currentTeamIndex].name}'s Turn
           </h2>
           <div className="text-lg text-muted-foreground">
-            Category: <span className="font-medium text-primary">{currentCategory}</span>
+            Category:{" "}
+            <span className="font-medium text-primary">{currentCategory}</span>
           </div>
           <Button size="lg" onClick={() => timer.start()}>
             Start Turn
@@ -156,23 +191,29 @@ export default function Game() {
                 <h3 className="font-medium text-primary mb-2">Guessed Words</h3>
                 <div className="max-h-48 overflow-y-auto">
                   <ul className="space-y-1">
-                    {results.filter(r => r.correct).map((result, i) => (
-                      <li key={i} className="text-sm">
-                        {result.word}
-                      </li>
-                    ))}
+                    {results
+                      .filter((r) => r.correct)
+                      .map((result, i) => (
+                        <li key={i} className="text-sm">
+                          {result.word}
+                        </li>
+                      ))}
                   </ul>
                 </div>
               </div>
               <div className="border-l pl-4">
-                <h3 className="font-medium text-destructive mb-2">Skipped Words</h3>
+                <h3 className="font-medium text-destructive mb-2">
+                  Skipped Words
+                </h3>
                 <div className="max-h-48 overflow-y-auto">
                   <ul className="space-y-1">
-                    {results.filter(r => !r.correct).map((result, i) => (
-                      <li key={i} className="text-sm text-muted-foreground">
-                        {result.word}
-                      </li>
-                    ))}
+                    {results
+                      .filter((r) => !r.correct)
+                      .map((result, i) => (
+                        <li key={i} className="text-sm text-muted-foreground">
+                          {result.word}
+                        </li>
+                      ))}
                   </ul>
                 </div>
               </div>
@@ -218,11 +259,7 @@ export default function Game() {
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
           <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4 space-y-4">
             <h3 className="text-2xl font-bold text-center">Time's Up!</h3>
-            <Button
-              size="lg"
-              className="w-full"
-              onClick={handleTurnEnd}
-            >
+            <Button size="lg" className="w-full" onClick={handleTurnEnd}>
               End Turn
             </Button>
           </div>
