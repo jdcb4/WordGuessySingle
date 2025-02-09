@@ -20,7 +20,7 @@ interface GameStore extends GameState {
 const initialState: GameState = {
   teams: [],
   currentRound: 1,
-  totalRounds: 3,
+  totalRounds: 3, // Default value
   currentTeamIndex: 0,
   excludedCategories: [],
   selectedDifficulties: ["Easy"],
@@ -37,10 +37,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     excludedCategories,
     selectedDifficulties,
     turnDuration,
-    totalRounds,
+    totalRounds, // Ensure totalRounds is set here
     isGameStarted: true,
     currentRound: 1,
-    currentTeamIndex: 0
+    currentTeamIndex: 0,
+    isGameOver: false // Reset game over state when initializing
   }),
 
   updateTeamScore: (teamId, points) => set(state => ({
@@ -54,12 +55,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
 
   nextTeam: () => set(state => {
-    // Calculate next team index
     const nextIndex = (state.currentTeamIndex + 1) % state.teams.length;
     const isRoundComplete = nextIndex === 0;
     const nextRound = isRoundComplete ? state.currentRound + 1 : state.currentRound;
-
-    // Check if game should end based on new state
     const isLastRound = nextRound > state.totalRounds;
 
     return {
