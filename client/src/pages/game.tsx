@@ -18,6 +18,7 @@ export default function Game() {
     teams,
     currentTeamIndex,
     excludedCategories,
+    selectedDifficulties,
     isGameOver,
     turnDuration,
     nextTeam,
@@ -55,7 +56,7 @@ export default function Game() {
       navigate("/");
       return;
     }
-    setCurrentWord(getRandomWord(currentCategory, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
   }, []);
 
   const getCurrentScore = () => {
@@ -71,7 +72,7 @@ export default function Game() {
     }
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: true }]);
-    setCurrentWord(getRandomWord(currentCategory, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
   };
 
   const handleSkip = () => {
@@ -83,7 +84,7 @@ export default function Game() {
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: false }]);
     setSkipsUsed(skipsUsed + 1);
-    setCurrentWord(getRandomWord(currentCategory, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
   };
 
   const handleTurnEnd = () => {
@@ -107,7 +108,7 @@ export default function Game() {
       setSkipsUsed(0);
       const newCategory = getRandomCategory(excludedCategories);
       setCurrentCategory(newCategory);
-      setCurrentWord(getRandomWord(newCategory, new Set()));
+      setCurrentWord(getRandomWord(newCategory, selectedDifficulties, new Set()));
       usedWords.clear();
     }
   };

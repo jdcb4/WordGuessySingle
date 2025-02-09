@@ -5,15 +5,23 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Team, TURN_DURATIONS, ROUND_OPTIONS } from "@shared/schema";
 import { CategorySelect } from "./category-select";
+import { DifficultySelect } from "./difficulty-select";
 
 interface TeamSetupProps {
-  onStart: (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number) => void;
+  onStart: (
+    teams: Team[],
+    excludedCategories: string[],
+    selectedDifficulties: string[],
+    turnDuration: number,
+    totalRounds: number
+  ) => void;
 }
 
 export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
   const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
+  const [selectedDifficulties, setSelectedDifficulties] = useState<string[]>(["Easy"]);
   const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
   const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
 
@@ -24,7 +32,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       score: 0,
       roundScores: []
     }));
-    onStart(teams, excludedCategories, turnDuration, totalRounds);
+    onStart(teams, excludedCategories, selectedDifficulties, turnDuration, totalRounds);
   };
 
   return (
@@ -93,6 +101,11 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
           </div>
         ))}
       </div>
+
+      <DifficultySelect
+        selectedDifficulties={selectedDifficulties}
+        onChange={setSelectedDifficulties}
+      />
 
       <CategorySelect
         excludedCategories={excludedCategories}
