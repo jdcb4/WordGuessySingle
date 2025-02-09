@@ -21,10 +21,10 @@ export default function Game() {
     selectedDifficulties,
     isGameOver,
     turnDuration,
+    totalRounds,
     nextTeam,
     addTurnResult,
-    currentRound,
-    totalRounds
+    currentRound
   } = useGameStore();
 
   const [currentCategory, setCurrentCategory] = useState<Category>(

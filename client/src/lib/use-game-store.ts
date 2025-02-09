@@ -37,10 +37,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     excludedCategories,
     selectedDifficulties,
     turnDuration,
-    totalRounds,
+    totalRounds, // Ensure totalRounds is set during initialization
     isGameStarted: true,
     currentRound: 1,
-    currentTeamIndex: 0
+    currentTeamIndex: 0,
+    isGameOver: false // Reset game over state
   }),
 
   updateTeamScore: (teamId, points) => set(state => ({
