@@ -3,32 +3,63 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
-import { Team, TURN_DURATIONS, ROUND_OPTIONS } from "@shared/schema";
+import { Slider } from "@/components/ui/slider";
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogAction,
+} from "@/components/ui/alert-dialog";
+import { Team, TURN_DURATIONS, CATEGORIES, DIFFICULTIES } from "@shared/schema";
 import { CategorySelect } from "./category-select";
+import { DifficultySelect } from "./difficulty-select";
+import { Info } from "lucide-react";
 
 interface TeamSetupProps {
-  onStart: (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number) => void;
+  onStart: (
+    teams: Team[],
+    includedCategories: string[],
+    turnDuration: number,
+    totalRounds: number,
+    includedDifficulties: string[]
+  ) => void;
 }
 
 export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
-  const [excludedCategories, setExcludedCategories] = useState<string[]>([]);
-  const [turnDuration, setTurnDuration] = useState(TURN_DURATIONS[2]); // Default to 30 seconds
+  const [includedCategories, setIncludedCategories] = useState<string[]>([...CATEGORIES]);
+  const [turnDuration, setTurnDuration] = useState<number>(TURN_DURATIONS[2]); // Default to 30 seconds
   const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
+  const [includedDifficulties, setIncludedDifficulties] = useState<string[]>(["Easy", "Medium"]);
+  const [infoOpen, setInfoOpen] = useState(false);
 
   const handleStart = () => {
+    if (includedCategories.length === 0) return;
+
     const teams: Team[] = Array.from({ length: teamCount }, (_, i) => ({
       id: i + 1,
       name: teamNames[i] || `Team ${i + 1}`,
       score: 0,
       roundScores: []
     }));
-    onStart(teams, excludedCategories, turnDuration, totalRounds);
+    onStart(teams, includedCategories, turnDuration, totalRounds, includedDifficulties);
   };
 
   return (
-    <Card className="p-6 max-w-md mx-auto space-y-6">
+    <Card className="p-6 max-w-md mx-auto space-y-6 relative">
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute top-4 right-4"
+        onClick={() => setInfoOpen(true)}
+      >
+        <Info className="h-5 w-5" />
+      </Button>
+
       <div className="space-y-2">
         <Label>Number of Teams</Label>
         <div className="flex gap-2">
@@ -46,19 +77,15 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       </div>
 
       <div className="space-y-2">
-        <Label>Number of Rounds</Label>
-        <div className="grid grid-cols-5 gap-2">
-          {ROUND_OPTIONS.map(num => (
-            <Button
-              key={num}
-              variant={totalRounds === num ? "default" : "outline"}
-              onClick={() => setTotalRounds(num)}
-              className="flex-1"
-            >
-              {num}
-            </Button>
-          ))}
-        </div>
+        <Label>Number of Rounds: {totalRounds}</Label>
+        <Slider
+          value={[totalRounds]}
+          onValueChange={([value]) => setTotalRounds(value)}
+          min={1}
+          max={10}
+          step={1}
+          className="py-4"
+        />
       </div>
 
       <div className="space-y-2">
@@ -76,6 +103,11 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
           ))}
         </div>
       </div>
+
+      <DifficultySelect
+        includedDifficulties={includedDifficulties}
+        onChange={setIncludedDifficulties}
+      />
 
       <div className="space-y-4">
         {Array.from({ length: teamCount }).map((_, i) => (
@@ -95,17 +127,33 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       </div>
 
       <CategorySelect
-        excludedCategories={excludedCategories}
-        onChange={setExcludedCategories}
+        includedCategories={includedCategories}
+        onChange={setIncludedCategories}
       />
 
       <Button
         size="lg"
         className="w-full"
         onClick={handleStart}
+        disabled={includedCategories.length === 0}
       >
         Start Game
       </Button>
+
+      <AlertDialog open={infoOpen} onOpenChange={setInfoOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>About Word Party</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-4">
+              <p>Coming at you from the Junto Crew.</p>
+              <img src="/junto.png" alt="Junto Logo" className="mx-auto" />
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setInfoOpen(false)}>Close</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

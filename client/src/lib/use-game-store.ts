@@ -1,8 +1,14 @@
 import { create } from 'zustand';
-import { GameState, Team, TurnResult, WordResult } from '@shared/schema';
+import { GameState, Team, TurnResult } from '@shared/schema';
 
 interface GameStore extends GameState {
-  initializeGame: (teams: Team[], excludedCategories: string[], turnDuration: number, totalRounds: number) => void;
+  initializeGame: (
+    teams: Team[],
+    includedCategories: string[],
+    turnDuration: number,
+    totalRounds: number,
+    includedDifficulties: string[]
+  ) => void;
   updateTeamScore: (teamId: number, points: number) => void;
   nextTeam: () => void;
   nextRound: () => void;
@@ -16,7 +22,8 @@ const initialState: GameState = {
   currentRound: 1,
   totalRounds: 3,
   currentTeamIndex: 0,
-  excludedCategories: [],
+  includedCategories: [],
+  includedDifficulties: ["Easy", "Medium"],
   isGameStarted: false,
   isGameOver: false,
   turnDuration: 30
@@ -25,9 +32,10 @@ const initialState: GameState = {
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  initializeGame: (teams, excludedCategories, turnDuration, totalRounds) => set({
+  initializeGame: (teams, includedCategories, turnDuration, totalRounds, includedDifficulties) => set({
     teams,
-    excludedCategories,
+    includedCategories,
+    includedDifficulties,
     turnDuration,
     totalRounds,
     isGameStarted: true,
@@ -46,12 +54,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   })),
 
   nextTeam: () => set(state => {
-    // Calculate next team index
     const nextIndex = (state.currentTeamIndex + 1) % state.teams.length;
     const isRoundComplete = nextIndex === 0;
     const nextRound = isRoundComplete ? state.currentRound + 1 : state.currentRound;
-
-    // Check if game should end based on new state
     const isLastRound = nextRound > state.totalRounds;
 
     return {

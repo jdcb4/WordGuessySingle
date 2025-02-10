@@ -4,9 +4,12 @@ import { motion } from "framer-motion";
 interface WordDisplayProps {
   word: string;
   category: string;
+  onNext?: () => void;
+  onSkip?: () => void;
+  disabled?: boolean;
 }
 
-export function WordDisplay({ word, category }: WordDisplayProps) {
+export function WordDisplay({ word, category, onNext, onSkip, disabled }: WordDisplayProps) {
   return (
     <motion.div
       initial={{ scale: 0.9, opacity: 0 }}

@@ -17,7 +17,8 @@ export default function Game() {
   const {
     teams,
     currentTeamIndex,
-    excludedCategories,
+    includedCategories,
+    includedDifficulties,
     isGameOver,
     turnDuration,
     nextTeam,
@@ -27,7 +28,7 @@ export default function Game() {
   } = useGameStore();
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
-    getRandomCategory(excludedCategories)
+    getRandomCategory(includedCategories)
   );
   const [usedWords] = useState<Set<string>>(new Set());
   const [currentWord, setCurrentWord] = useState("");
@@ -55,7 +56,7 @@ export default function Game() {
       navigate("/");
       return;
     }
-    setCurrentWord(getRandomWord(currentCategory, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, includedDifficulties, usedWords));
   }, []);
 
   const getCurrentScore = () => {
@@ -71,7 +72,7 @@ export default function Game() {
     }
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: true }]);
-    setCurrentWord(getRandomWord(currentCategory, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, includedDifficulties, usedWords));
   };
 
   const handleSkip = () => {
@@ -83,7 +84,7 @@ export default function Game() {
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: false }]);
     setSkipsUsed(skipsUsed + 1);
-    setCurrentWord(getRandomWord(currentCategory, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, includedDifficulties, usedWords));
   };
 
   const handleTurnEnd = () => {
@@ -105,9 +106,9 @@ export default function Game() {
       timer.reset();
       setResults([]);
       setSkipsUsed(0);
-      const newCategory = getRandomCategory(excludedCategories);
+      const newCategory = getRandomCategory(includedCategories);
       setCurrentCategory(newCategory);
-      setCurrentWord(getRandomWord(newCategory, new Set()));
+      setCurrentWord(getRandomWord(newCategory, includedDifficulties, new Set()));
       usedWords.clear();
     }
   };
