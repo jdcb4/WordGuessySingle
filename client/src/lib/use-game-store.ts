@@ -37,11 +37,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     excludedCategories,
     selectedDifficulties,
     turnDuration,
-    totalRounds, // Ensure totalRounds is set during initialization
+    totalRounds,
     isGameStarted: true,
     currentRound: 1,
     currentTeamIndex: 0,
-    isGameOver: false // Reset game over state
+    isGameOver: false
   }),
 
   updateTeamScore: (teamId, points) => set(state => ({
@@ -58,22 +58,28 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Calculate next team index
     const nextIndex = (state.currentTeamIndex + 1) % state.teams.length;
     const isRoundComplete = nextIndex === 0;
+
+    // Only increment round if we've gone through all teams
     const nextRound = isRoundComplete ? state.currentRound + 1 : state.currentRound;
 
-    // Check if game should end based on new state
-    const isLastRound = nextRound > state.totalRounds;
+    // Check if game should end
+    const shouldEndGame = nextRound > state.totalRounds;
 
     return {
-      currentTeamIndex: isLastRound ? state.currentTeamIndex : nextIndex,
-      currentRound: nextRound,
-      isGameOver: isLastRound
+      currentTeamIndex: shouldEndGame ? state.currentTeamIndex : nextIndex,
+      currentRound: shouldEndGame ? state.currentRound : nextRound,
+      isGameOver: shouldEndGame
     };
   }),
 
-  nextRound: () => set(state => ({
-    currentRound: state.currentRound + 1,
-    currentTeamIndex: 0
-  })),
+  nextRound: () => set(state => {
+    const nextRound = state.currentRound + 1;
+    return {
+      currentRound: nextRound,
+      currentTeamIndex: 0,
+      isGameOver: nextRound > state.totalRounds
+    };
+  }),
 
   endGame: () => set({ isGameOver: true }),
 

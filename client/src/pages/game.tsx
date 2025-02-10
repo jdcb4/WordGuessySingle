@@ -22,9 +22,9 @@ export default function Game() {
     isGameOver,
     turnDuration,
     totalRounds,
+    currentRound,
     nextTeam,
     addTurnResult,
-    currentRound
   } = useGameStore();
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
