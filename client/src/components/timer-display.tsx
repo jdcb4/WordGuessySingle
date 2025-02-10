@@ -22,11 +22,8 @@ export function TimerDisplay({ timeLeft, total }: TimerDisplayProps) {
         value={percentage}
         className={cn(
           "h-3 transition-colors",
-          isLow ? "bg-red-100" : "bg-primary/20"
-        )}
-        indicatorClassName={cn(
-          "transition-all",
-          isLow ? "bg-red-500" : "bg-primary"
+          isLow ? "bg-red-100" : "bg-primary/20",
+          isLow ? "data-[state=complete]:bg-red-500" : "data-[state=complete]:bg-primary"
         )}
       />
     </div>

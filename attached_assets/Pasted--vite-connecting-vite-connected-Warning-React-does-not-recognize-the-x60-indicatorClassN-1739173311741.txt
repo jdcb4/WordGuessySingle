@@ -1,0 +1,37 @@
+[vite] connecting...
+[vite] connected.
+Warning: React does not recognize the &#x60;indicatorClassName&#x60; prop on a DOM element. If you intentionally want it to appear in the DOM as a custom attribute, spell it as lowercase &#x60;indicatorclassname&#x60; instead. If you accidentally passed it from a parent component, remove it from the DOM element.
+    at div
+    at https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-GPVWVTJC.js?v=1fcf4308:41:13
+    at Provider (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-progress.js?v=1fcf4308:30:15)
+    at https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-progress.js?v=1fcf4308:90:7
+    at _c (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/src/components/ui/progress.tsx:21:11)
+    at div
+    at TimerDisplay (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/src/components/timer-display.tsx:19:32)
+    at div
+    at div
+    at Game (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/src/pages/game.tsx:32:24)
+    at Route (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1fcf4308:323:16)
+    at Switch (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1fcf4308:379:17)
+    at Router
+    at QueryClientProvider (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1fcf4308:2805:3)
+    at App
+at div
+at https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-GPVWVTJC.js?v=1fcf4308:41:13
+at Provider (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-progress.js?v=1fcf4308:30:15)
+at https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-progress.js?v=1fcf4308:90:7
+at _c (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/src/components/ui/progress.tsx:21:11)
+at div
+at TimerDisplay (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/src/components/timer-display.tsx:19:32)
+at div
+at div
+at Game (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/src/pages/game.tsx:32:24)
+at Route (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1fcf4308:323:16)
+at Switch (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=1fcf4308:379:17)
+at Router
+at QueryClientProvider (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=1fcf4308:2805:3)
+at App
+at t.value (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:17465)
+at new t (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:12630)
+at t.value (https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:32766)
+at https://8141c3f4-39ae-4d3b-b306-8c81f745e23b-00-2lmjf5pnztc6m.picard.replit.dev/__replco/static/devtools/eruda/3.2.3/eruda.js:2:34400
