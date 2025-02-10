@@ -13,10 +13,9 @@ export type Team = {
 export type GameState = {
   teams: Team[];
   currentRound: number;
-  totalRounds: number;
+  totalRounds: number; // Added total rounds configuration
   currentTeamIndex: number;
   excludedCategories: string[];
-  selectedDifficulties: string[];
   isGameStarted: boolean;
   isGameOver: boolean;
   turnDuration: number;
@@ -44,17 +43,10 @@ export const CATEGORIES = [
   "Place"
 ] as const;
 
-export const DIFFICULTIES = [
-  "Easy",
-  "Medium",
-  "Hard"
-] as const;
-
 export const TURN_DURATIONS = [5, 15, 30, 45] as const;
 export const ROUND_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export type Category = typeof CATEGORIES[number];
-export type Difficulty = typeof DIFFICULTIES[number];
 export type TurnDuration = typeof TURN_DURATIONS[number];
 export type RoundCount = typeof ROUND_OPTIONS[number];
 
@@ -69,7 +61,6 @@ export const gameStateSchema = z.object({
   totalRounds: z.number(),
   currentTeamIndex: z.number(),
   excludedCategories: z.array(z.string()),
-  selectedDifficulties: z.array(z.string()),
   isGameStarted: z.boolean(),
   isGameOver: z.boolean(),
   turnDuration: z.number()

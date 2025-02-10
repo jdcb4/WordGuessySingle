@@ -18,13 +18,12 @@ export default function Game() {
     teams,
     currentTeamIndex,
     excludedCategories,
-    selectedDifficulties,
     isGameOver,
     turnDuration,
-    totalRounds,
-    currentRound,
     nextTeam,
     addTurnResult,
+    currentRound,
+    totalRounds
   } = useGameStore();
 
   const [currentCategory, setCurrentCategory] = useState<Category>(
@@ -56,7 +55,7 @@ export default function Game() {
       navigate("/");
       return;
     }
-    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, usedWords));
   }, []);
 
   const getCurrentScore = () => {
@@ -72,7 +71,7 @@ export default function Game() {
     }
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: true }]);
-    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, usedWords));
   };
 
   const handleSkip = () => {
@@ -84,7 +83,7 @@ export default function Game() {
     usedWords.add(currentWord);
     setResults([...results, { word: currentWord, category: currentCategory, correct: false }]);
     setSkipsUsed(skipsUsed + 1);
-    setCurrentWord(getRandomWord(currentCategory, selectedDifficulties, usedWords));
+    setCurrentWord(getRandomWord(currentCategory, usedWords));
   };
 
   const handleTurnEnd = () => {
@@ -108,7 +107,7 @@ export default function Game() {
       setSkipsUsed(0);
       const newCategory = getRandomCategory(excludedCategories);
       setCurrentCategory(newCategory);
-      setCurrentWord(getRandomWord(newCategory, selectedDifficulties, new Set()));
+      setCurrentWord(getRandomWord(newCategory, new Set()));
       usedWords.clear();
     }
   };
