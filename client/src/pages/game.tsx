@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import useSound from "use-sound";
 import { QuitGameDialog } from "@/components/quit-game-dialog";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function Game() {
   const [, navigate] = useLocation();
@@ -149,7 +151,7 @@ export default function Game() {
   return (
     <div className="min-h-screen flex flex-col">
       <QuitGameDialog />
-      <div className="flex-1 overflow-y-auto p-6 pb-96 space-y-6">
+      <div className="flex-1 overflow-y-auto p-6 pb-48 space-y-6">
         <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
         <WordDisplay
@@ -166,9 +168,10 @@ export default function Game() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h3 className="font-medium text-primary mb-2">Guessed Words</h3>
-                <div className="max-h-48 overflow-y-auto">
+                <div className="overflow-y-auto" style={{ maxHeight: 'calc(60vh - 20rem)' }}>
                   <ul className="space-y-1">
-                    {results
+                    {[...results]
+                      .reverse()
                       .filter((r) => r.correct)
                       .map((result, i) => (
                         <li key={i} className="text-sm">
@@ -182,9 +185,10 @@ export default function Game() {
                 <h3 className="font-medium text-destructive mb-2">
                   Skipped Words
                 </h3>
-                <div className="max-h-48 overflow-y-auto">
+                <div className="overflow-y-auto" style={{ maxHeight: 'calc(60vh - 20rem)' }}>
                   <ul className="space-y-1">
-                    {results
+                    {[...results]
+                      .reverse()
                       .filter((r) => !r.correct)
                       .map((result, i) => (
                         <li key={i} className="text-sm text-muted-foreground">
@@ -199,7 +203,7 @@ export default function Game() {
         </div>
       </div>
 
-      <div className="fixed bottom-[10%] left-0 right-0 space-y-4 p-4 bg-background/80 backdrop-blur-sm border-t">
+      <div className="fixed bottom-0 left-0 right-0 space-y-4 p-4 bg-background/80 backdrop-blur-sm border-t">
         <Card className="p-4 mb-4">
           <div className="text-lg font-medium">
             Current Score: {getCurrentScore()}
@@ -239,38 +243,6 @@ export default function Game() {
 
             <div className="text-xl font-semibold text-center text-primary">
               Score this turn: {getCurrentScore()}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium text-primary mb-2">Correct Words</h4>
-                <div className="max-h-48 overflow-y-auto">
-                  <ul className="space-y-1">
-                    {results
-                      .filter((r) => r.correct)
-                      .map((result, i) => (
-                        <li key={i} className="text-sm">
-                          {result.word}
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="border-l pl-4">
-                <h4 className="font-medium text-destructive mb-2">Skipped Words</h4>
-                <div className="max-h-48 overflow-y-auto">
-                  <ul className="space-y-1">
-                    {results
-                      .filter((r) => !r.correct)
-                      .map((result, i) => (
-                        <li key={i} className="text-sm text-muted-foreground">
-                          {result.word}
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              </div>
             </div>
 
             <Button size="lg" className="w-full" onClick={handleTurnEnd}>
