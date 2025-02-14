@@ -36,22 +36,45 @@ export default function Game() {
   const [currentWord, setCurrentWord] = useState("");
   const [results, setResults] = useState<WordResult[]>([]);
   const [skipsUsed, setSkipsUsed] = useState(0);
+  const [soundsLoaded, setSoundsLoaded] = useState(false);
 
   const timer = useTimer(turnDuration);
-  const [playTimerSound] = useSound("/countdown.mp3", { volume: 0.5 });
-  const [playCorrectSound] = useSound("/correct.mp3", { volume: 0.5 });
-  const [playSkipSound] = useSound("/skip.mp3", { volume: 0.5 });
+  const [playTimerSound] = useSound("countdown.mp3", { 
+    volume: 0.5,
+    onload: () => setSoundsLoaded(true)
+  });
+  const [playCorrectSound] = useSound("correct.mp3", { 
+    volume: 0.5,
+    onload: () => setSoundsLoaded(true)
+  });
+  const [playSkipSound] = useSound("skip.mp3", { 
+    volume: 0.5,
+    onload: () => setSoundsLoaded(true)
+  });
 
-  // Timer sound effect
   useEffect(() => {
-    if (timer.timeLeft === 5 && timer.isActive) {
+    const loadSounds = async () => {
       try {
-        playTimerSound();
+        // Preload sounds
+        await Promise.all([
+          new Audio("countdown.mp3").load(),
+          new Audio("correct.mp3").load(),
+          new Audio("skip.mp3").load()
+        ]);
+        setSoundsLoaded(true);
       } catch (error) {
-        console.error("Error playing timer sound:", error);
+        console.error("Error loading sounds:", error);
+        // Continue without sounds if they fail to load
+        setSoundsLoaded(true);
       }
-    }
-  }, [timer.timeLeft, playTimerSound, timer.isActive]);
+    };
+
+    loadSounds();
+  }, []);
+
+  useEffect(() => {
+    console.log('Sound loaded state:', soundsLoaded);
+  }, [soundsLoaded]);
 
   useEffect(() => {
     if (!teams.length) {
@@ -63,16 +86,29 @@ export default function Game() {
     );
   }, []);
 
+  useEffect(() => {
+    if (timer.isActive && !timer.isFinished && soundsLoaded) {
+      try {
+        playTimerSound();
+      } catch (error) {
+        console.error("Error playing timer sound:", error);
+      }
+    }
+  }, [timer.isActive, timer.isFinished, soundsLoaded, playTimerSound]);
+
   const getCurrentScore = () => {
     const correctWords = results.filter((r) => r.correct);
     return correctWords.length - Math.max(0, skipsUsed - 1);
   };
 
   const handleNext = () => {
-    try {
-      playCorrectSound();
-    } catch (error) {
-      console.error("Error playing correct sound:", error);
+    console.log('Playing correct sound, loaded:', soundsLoaded);
+    if (soundsLoaded) {
+      try {
+        playCorrectSound();
+      } catch (error) {
+        console.error("Error playing correct sound:", error);
+      }
     }
     usedWords.add(currentWord);
     setResults([
@@ -85,10 +121,13 @@ export default function Game() {
   };
 
   const handleSkip = () => {
-    try {
-      playSkipSound();
-    } catch (error) {
-      console.error("Error playing skip sound:", error);
+    console.log('Playing skip sound, loaded:', soundsLoaded);
+    if (soundsLoaded) {
+      try {
+        playSkipSound();
+      } catch (error) {
+        console.error("Error playing skip sound:", error);
+      }
     }
     usedWords.add(currentWord);
     setResults([
@@ -140,7 +179,19 @@ export default function Game() {
             Category:{" "}
             <span className="font-medium text-primary">{currentCategory}</span>
           </div>
-          <Button size="lg" onClick={() => timer.start()}>
+          <Button 
+            size="lg" 
+            onClick={() => {
+              timer.start();
+              if (soundsLoaded) {
+                try {
+                  playTimerSound();
+                } catch (error) {
+                  console.error("Error playing timer sound:", error);
+                }
+              }
+            }}
+          >
             Start Turn
           </Button>
         </div>
