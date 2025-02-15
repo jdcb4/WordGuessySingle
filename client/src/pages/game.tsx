@@ -52,6 +52,9 @@ export default function Game() {
     onload: () => setSoundsLoaded(true)
   });
 
+  // Add state to track if we've played the countdown this turn
+  const [hasPlayedCountdown, setHasPlayedCountdown] = useState(false);
+
   useEffect(() => {
     const loadSounds = async () => {
       try {
@@ -86,19 +89,35 @@ export default function Game() {
     );
   }, []);
 
+  // Update the countdown sound effect
   useEffect(() => {
-    if (timer.isActive && !timer.isFinished && soundsLoaded) {
+    if (
+      timer.isActive && 
+      !timer.isFinished && 
+      soundsLoaded && 
+      timer.timeLeft === 5 && // Exactly at 5 seconds
+      !hasPlayedCountdown     // Haven't played it yet this turn
+    ) {
       try {
         playTimerSound();
+        setHasPlayedCountdown(true);  // Mark as played for this turn
       } catch (error) {
         console.error("Error playing timer sound:", error);
       }
     }
-  }, [timer.isActive, timer.isFinished, soundsLoaded, playTimerSound]);
+  }, [timer.isActive, timer.isFinished, soundsLoaded, timer.timeLeft, playTimerSound, hasPlayedCountdown]);
+
+  // Reset hasPlayedCountdown when starting a new turn
+  useEffect(() => {
+    if (!timer.isActive || timer.isFinished) {
+      setHasPlayedCountdown(false);
+    }
+  }, [timer.isActive, timer.isFinished]);
 
   const getCurrentScore = () => {
     const correctWords = results.filter((r) => r.correct);
-    return correctWords.length - Math.max(0, skipsUsed - 1);
+    // Use Math.max to ensure the score doesn't go below 0
+    return Math.max(0, correctWords.length - Math.max(0, skipsUsed - 1));
   };
 
   const handleNext = () => {
@@ -168,6 +187,10 @@ export default function Game() {
     }
   };
 
+  const handleStartTurn = () => {
+    timer.start();
+  };
+
   if (!timer.isActive && !timer.isFinished) {
     return (
       <div className="min-h-screen p-6 flex items-center justify-center">
@@ -181,19 +204,73 @@ export default function Game() {
           </div>
           <Button 
             size="lg" 
-            onClick={() => {
-              timer.start();
-              if (soundsLoaded) {
-                try {
-                  playTimerSound();
-                } catch (error) {
-                  console.error("Error playing timer sound:", error);
-                }
-              }
-            }}
+            onClick={handleStartTurn}
           >
             Start Turn
           </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (timer.isFinished) {
+    return (
+      <div className="min-h-screen p-6 flex items-center justify-center">
+        <div className="w-full max-w-md space-y-4">
+          <Card className="p-6">
+            <div className="space-y-6">
+              <div className="text-center">
+                <h2 className="text-2xl font-bold mb-2">Turn Complete!</h2>
+                <div className="text-xl font-semibold text-primary">
+                  Score this turn: {getCurrentScore()}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {/* Correct Words */}
+                <div>
+                  <h3 className="font-medium text-primary mb-2">
+                    Correct Words ({results.filter(r => r.correct).length})
+                  </h3>
+                  <div className="overflow-y-auto max-h-48">
+                    <ul className="space-y-1">
+                      {results
+                        .filter(r => r.correct)
+                        .map((result, i) => (
+                          <li key={i} className="text-sm">
+                            {result.word}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Skipped Words */}
+                <div>
+                  <h3 className="font-medium text-destructive mb-2">
+                    Skipped Words ({results.filter(r => !r.correct).length})
+                  </h3>
+                  <div className="overflow-y-auto max-h-48">
+                    <ul className="space-y-1">
+                      {results
+                        .filter(r => !r.correct)
+                        .map((result, i) => (
+                          <li key={i} className="text-sm text-muted-foreground">
+                            {result.word}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <Button size="lg" className="w-full" onClick={handleTurnEnd}>
+                  End Turn
+                </Button>
+              </div>
+            </div>
+          </Card>
         </div>
       </div>
     );
@@ -286,22 +363,6 @@ export default function Game() {
           </Button>
         </div>
       </div>
-
-      {timer.isFinished && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
-          <div className="bg-background p-6 rounded-lg shadow-lg max-w-md w-full mx-4 space-y-4">
-            <h3 className="text-2xl font-bold text-center">Time's Up!</h3>
-
-            <div className="text-xl font-semibold text-center text-primary">
-              Score this turn: {getCurrentScore()}
-            </div>
-
-            <Button size="lg" className="w-full" onClick={handleTurnEnd}>
-              End Turn
-            </Button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
