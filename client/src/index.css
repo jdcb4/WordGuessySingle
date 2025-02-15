@@ -1,13 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --background: 280 40% 96%;
+    --foreground: 280 10% 20%;
+    
+    --card: 280 40% 98%;
+    --card-foreground: 280 10% 20%;
+ 
+    --popover: 280 40% 98%;
+    --popover-foreground: 280 10% 20%;
+ 
+    --primary: 280 60% 60%;
+    --primary-foreground: 280 10% 98%;
+ 
+    --secondary: 150 40% 90%;
+    --secondary-foreground: 150 10% 20%;
+ 
+    --muted: 25 40% 90%;
+    --muted-foreground: 25 10% 40%;
+ 
+    --accent: 190 40% 90%;
+    --accent-foreground: 190 10% 20%;
+ 
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 280 20% 88%;
+    --input: 280 20% 88%;
+    --ring: 280 60% 60%;
+ 
+    --radius: 1rem;
+  }
+
   * {
     @apply border-border;
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    @apply bg-background text-foreground;
+    font-family: 'Quicksand', sans-serif;
+    background-image: linear-gradient(
+      to bottom right,
+      hsl(280 40% 96%),
+      hsl(150 40% 94%),
+      hsl(25 40% 94%)
+    );
+    min-height: 100vh;
   }
+}
+
+/* Add smooth transitions */
+.card,
+.button,
+.dialog {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Hover effects */
+.button:hover {
+  @apply transform scale-105;
+}
+
+/* Card and dialog styles */
+.card,
+.dialog {
+  @apply shadow-lg bg-opacity-95 backdrop-blur-sm;
+  box-shadow: 
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1),
+    inset 0 1px 1px rgb(255 255 255 / 0.5);
 }

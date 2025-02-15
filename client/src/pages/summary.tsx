@@ -6,34 +6,42 @@ import { motion } from "framer-motion";
 import confetti from 'canvas-confetti';
 import useSound from 'use-sound';
 import { QuitGameDialog } from "@/components/quit-game-dialog";
+import { useEffect } from "react";
 
 export default function Summary() {
   const [, navigate] = useLocation();
   const { teams, reset } = useGameStore();
-  const [playWoohoo] = useSound('/woohoo.mp3', { volume: 0.5 });
+  const [playWoohoo] = useSound('woohoo.mp3', { 
+    volume: 0.5,
+    onplayerror: (_, err) => console.error("Error playing woohoo:", err)
+  });
 
   // Find winning team(s)
   const maxScore = Math.max(...teams.map(t => t.score));
   const winners = teams.filter(t => t.score === maxScore);
 
+  // Move the confetti and sound to useEffect to ensure it runs after component mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 }
+      });
+      try {
+        playWoohoo();
+      } catch (error) {
+        console.error('Error playing woohoo sound:', error);
+      }
+    }, 500);
+
+    return () => clearTimeout(timer); // Cleanup
+  }, []); // Empty dependency array means this runs once on mount
+
   const handlePlayAgain = () => {
     reset();
     navigate("/");
   };
-
-  // Trigger confetti and sound effect
-  setTimeout(() => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 }
-    });
-    try {
-      playWoohoo();
-    } catch (error) {
-      console.error('Error playing woohoo sound:', error);
-    }
-  }, 500);
 
   return (
     <div className="min-h-screen p-6 bg-gradient-to-b from-background to-primary/5">

@@ -143,10 +143,21 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       <AlertDialog open={infoOpen} onOpenChange={setInfoOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>About Word Party</AlertDialogTitle>
+            <AlertDialogTitle>About WordGuessy</AlertDialogTitle>
             <AlertDialogDescription className="space-y-4">
-              <p>Coming at you from the Junto Crew.</p>
-              <img src="/junto.png" alt="Junto Logo" className="mx-auto" />
+              <div className="text-center">
+                <img 
+                  src="junto.png" 
+                  alt="Junto Logo" 
+                  className="mx-auto w-32 h-32 mb-4"
+                />
+                <p className="text-lg">
+                  A fun word guessing game for teams, created by Junto.
+                </p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Version 1.0
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
