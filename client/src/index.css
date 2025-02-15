@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400;500;600;700&family=Quicksand:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -12,29 +12,26 @@
     --card: 280 40% 98%;
     --card-foreground: 280 10% 20%;
  
-    --popover: 280 40% 98%;
-    --popover-foreground: 280 10% 20%;
+    --primary: 350 80% 70%;
+    --primary-foreground: 350 10% 98%;
  
-    --primary: 280 60% 60%;
-    --primary-foreground: 280 10% 98%;
- 
-    --secondary: 150 40% 90%;
+    --secondary: 150 70% 80%;
     --secondary-foreground: 150 10% 20%;
  
-    --muted: 25 40% 90%;
+    --muted: 25 70% 85%;
     --muted-foreground: 25 10% 40%;
  
-    --accent: 190 40% 90%;
+    --accent: 190 70% 85%;
     --accent-foreground: 190 10% 20%;
  
-    --destructive: 0 84% 60%;
+    --destructive: 0 84% 70%;
     --destructive-foreground: 0 0% 98%;
 
     --border: 280 20% 88%;
     --input: 280 20% 88%;
     --ring: 280 60% 60%;
  
-    --radius: 1rem;
+    --radius: 1.5rem;
   }
 
   * {
@@ -44,34 +41,171 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Quicksand', sans-serif;
-    background-image: linear-gradient(
-      to bottom right,
-      hsl(280 40% 96%),
-      hsl(150 40% 94%),
-      hsl(25 40% 94%)
-    );
     min-height: 100vh;
+    position: relative;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Caveat', cursive;
+    letter-spacing: 0.02em;
+  }
+
+  /* Remove z-index from base elements to prevent stacking context issues */
+  button, 
+  a, 
+  input, 
+  select {
+    position: relative;
   }
 }
 
-/* Add smooth transitions */
-.card,
+/* Background gradients */
+.background-gradients {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 100% 100%, hsl(350 70% 90%), transparent 40%),
+    radial-gradient(circle at 0% 0%, hsl(150 70% 90%), transparent 40%),
+    radial-gradient(circle at 50% 50%, hsl(190 70% 90%), transparent 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure main content is above background */
+#root {
+  position: relative;
+  z-index: 1;
+}
+
+/* Update Card component z-index */
+.card {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure form elements are above cards */
+.input,
+.select,
+.slider,
 .button,
-.dialog {
-  @apply transition-all duration-200 ease-in-out;
+button,
+[role="button"],
+[type="button"],
+[type="submit"] {
+  position: relative;
+  z-index: 2;
+  pointer-events: auto !important;
 }
 
-/* Hover effects */
-.button:hover {
-  @apply transform scale-105;
+/* Ensure dialog content is above everything */
+.dialog,
+[role="dialog"],
+.alert-dialog-content {
+  position: relative;
+  z-index: 50;
 }
 
-/* Card and dialog styles */
+/* Keep background elements below */
+.background-gradients,
+.doodle-border::before,
+.doodle-border::after {
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Ensure proper stacking for overlays */
+.backdrop-blur-sm {
+  z-index: 40;
+}
+
+/* Remove any pointer-event blocking */
+.bg-opacity-95,
+.backdrop-blur-sm,
+.bg-background {
+  pointer-events: auto;
+}
+
+/* Ensure proper layering for team setup page */
+.team-setup {
+  position: relative;
+  z-index: 1;
+}
+
+/* Doodle border effect */
+.doodle-border {
+  position: relative;
+  border: none;
+}
+
+.doodle-border::before,
+.doodle-border::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 2px solid currentColor;
+  border-radius: inherit;
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.doodle-border::after {
+  transform: rotate(0.5deg);
+}
+
+/* Card and dialog styles with doodle effect */
 .card,
 .dialog {
-  @apply shadow-lg bg-opacity-95 backdrop-blur-sm;
+  @apply bg-card shadow-lg relative;
   box-shadow: 
     0 4px 6px -1px rgb(0 0 0 / 0.1),
     0 2px 4px -2px rgb(0 0 0 / 0.1),
     inset 0 1px 1px rgb(255 255 255 / 0.5);
+}
+
+/* Playful button styles */
+.button {
+  @apply transition-all duration-200 ease-bounce;
+}
+
+.button:hover {
+  @apply transform scale-110;
+  animation: wiggle 0.5s ease-in-out;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0) scale(1.1); }
+  25% { transform: rotate(-3deg) scale(1.1); }
+  75% { transform: rotate(3deg) scale(1.1); }
+}
+
+/* Custom animation for score changes */
+@keyframes pop-score {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.score-change {
+  animation: pop-score 0.5s ease-bounce;
+}
+
+/* Custom bounce ease */
+@layer utilities {
+  .ease-bounce {
+    transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+}
+
+/* Ensure decorative elements don't block interactions */
+.bg-gradient-to-b,
+.bg-gradient-to-r,
+.radial-gradient {
+  pointer-events: none;
+}
+
+/* Keep content above decorative backgrounds */
+.content-layer {
+  position: relative;
+  z-index: 2;
 }
