@@ -6,13 +6,15 @@ import { motion } from "framer-motion";
 import confetti from 'canvas-confetti';
 import useSound from 'use-sound';
 import { QuitGameDialog } from "@/components/quit-game-dialog";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function Summary() {
   const [, navigate] = useLocation();
   const { teams, reset } = useGameStore();
+  const [soundLoaded, setSoundLoaded] = useState(false);
   const [playWoohoo] = useSound('woohoo.mp3', { 
     volume: 0.5,
+    onload: () => setSoundLoaded(true),
     onplayerror: (_, err) => console.error("Error playing woohoo:", err)
   });
 
@@ -20,23 +22,48 @@ export default function Summary() {
   const maxScore = Math.max(...teams.map(t => t.score));
   const winners = teams.filter(t => t.score === maxScore);
 
-  // Move the confetti and sound to useEffect to ensure it runs after component mount
+  // Separate effect for sound loading
   useEffect(() => {
+    const loadSound = async () => {
+      try {
+        // Preload the sound
+        const audio = new Audio('woohoo.mp3');
+        await audio.load();
+        setSoundLoaded(true);
+      } catch (error) {
+        console.error('Error loading woohoo sound:', error);
+      }
+    };
+
+    loadSound();
+  }, []);
+
+  // Separate effect for playing sound and confetti
+  useEffect(() => {
+    if (!soundLoaded) return;
+
     const timer = setTimeout(() => {
+      // Trigger confetti
       confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 }
       });
-      try {
-        playWoohoo();
-      } catch (error) {
-        console.error('Error playing woohoo sound:', error);
-      }
+
+      // Play sound with user interaction safety
+      const playSound = async () => {
+        try {
+          await playWoohoo();
+        } catch (error) {
+          console.error('Error playing woohoo sound:', error);
+        }
+      };
+      
+      playSound();
     }, 500);
 
-    return () => clearTimeout(timer); // Cleanup
-  }, []); // Empty dependency array means this runs once on mount
+    return () => clearTimeout(timer);
+  }, [soundLoaded, playWoohoo]);
 
   const handlePlayAgain = () => {
     reset();
