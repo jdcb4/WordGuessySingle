@@ -13,6 +13,7 @@ import useSound from "use-sound";
 import { QuitGameDialog } from "@/components/quit-game-dialog";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { useTensionSound } from "@/lib/use-tension-sound";
 
 export default function Game() {
   const [, navigate] = useLocation();
@@ -90,22 +91,22 @@ export default function Game() {
   }, []);
 
   // Update the countdown sound effect
-  useEffect(() => {
-    if (
-      timer.isActive && 
-      !timer.isFinished && 
-      soundsLoaded && 
-      timer.timeLeft === 5 && // Exactly at 5 seconds
-      !hasPlayedCountdown     // Haven't played it yet this turn
-    ) {
-      try {
-        playTimerSound();
-        setHasPlayedCountdown(true);  // Mark as played for this turn
-      } catch (error) {
-        console.error("Error playing timer sound:", error);
-      }
-    }
-  }, [timer.isActive, timer.isFinished, soundsLoaded, timer.timeLeft, playTimerSound, hasPlayedCountdown]);
+  // useEffect(() => {
+  //   if (
+  //     timer.isActive && 
+  //     !timer.isFinished && 
+  //     soundsLoaded && 
+  //     timer.timeLeft === 5 && // Exactly at 5 seconds
+  //     !hasPlayedCountdown     // Haven't played it yet this turn
+  //   ) {
+  //     try {
+  //       playTimerSound();
+  //       setHasPlayedCountdown(true);  // Mark as played for this turn
+  //     } catch (error) {
+  //       console.error("Error playing timer sound:", error);
+  //     }
+  //   }
+  // }, [timer.isActive, timer.isFinished, soundsLoaded, timer.timeLeft, playTimerSound, hasPlayedCountdown]);
 
   // Reset hasPlayedCountdown when starting a new turn
   useEffect(() => {
@@ -113,6 +114,16 @@ export default function Game() {
       setHasPlayedCountdown(false);
     }
   }, [timer.isActive, timer.isFinished]);
+
+  // Add this effect to handle the final word when timer finishes
+  useEffect(() => {
+    if (timer.isFinished && currentWord) {
+      setResults(prev => [
+        ...prev,
+        { word: currentWord, category: currentCategory, correct: false }
+      ]);
+    }
+  }, [timer.isFinished]);
 
   const getCurrentScore = () => {
     const correctWords = results.filter((r) => r.correct);
@@ -188,8 +199,15 @@ export default function Game() {
   };
 
   const handleStartTurn = () => {
-    timer.start();
+    if (!timer.isActive) {
+      setResults([]);
+      setSkipsUsed(0);
+      setCurrentWord(getRandomWord(currentCategory, includedDifficulties, usedWords));
+      timer.start();
+    }
   };
+
+  useTensionSound(timer.isActive, timer.timeLeft, turnDuration);
 
   if (!timer.isActive && !timer.isFinished) {
     return (
@@ -224,6 +242,12 @@ export default function Game() {
                 <div className="text-xl font-semibold text-primary">
                   Score this turn: {getCurrentScore()}
                 </div>
+              </div>
+
+              {/* Add Final Word Display */}
+              <div className="p-4 bg-muted/50 rounded-lg text-center">
+                <h3 className="font-medium text-muted-foreground mb-1">Final Word</h3>
+                <p className="text-lg font-medium">{currentWord}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -348,21 +372,21 @@ export default function Game() {
         <div className="max-w-md mx-auto flex gap-4">
           <Button
             size="lg"
+            variant="outline"
+            onClick={handleSkip}
+            disabled={timer.isFinished}
+            className="flex-1"
+          >
+            Skip ({skipsUsed})
+          </Button>
+          <Button
+            size="lg"
             variant="default"
             onClick={handleNext}
             disabled={timer.isFinished}
             className="flex-1"
           >
             Next
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={handleSkip}
-            disabled={timer.isFinished}
-            className="flex-1"
-          >
-            Skip
           </Button>
         </div>
       </div>
