@@ -277,61 +277,64 @@ export default function Game() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="app-container">
       <QuitGameDialog />
-      <div className="flex-1 overflow-y-auto p-6 pb-48 space-y-6">
-        <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
+      
+      <div className="content-area">
+        <div className="max-w-md mx-auto space-y-4">
+          <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
-        <WordDisplay
-          word={currentWord}
-          category={currentCategory}
-          onNext={handleNext}
-          onSkip={handleSkip}
-          disabled={timer.isFinished}
-        />
+          <WordDisplay
+            word={currentWord}
+            category={currentCategory}
+            onNext={handleNext}
+            onSkip={handleSkip}
+            disabled={timer.isFinished}
+          />
 
-        <div className="space-y-4">
-          <Card className="p-4">
-            <div className="text-lg font-medium mb-2">Results</div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="font-medium text-primary mb-2">Guessed Words</h3>
-                <div className="overflow-y-auto" style={{ maxHeight: 'calc(60vh - 20rem)' }}>
-                  <ul className="space-y-1">
-                    {[...results]
-                      .reverse()
-                      .filter((r) => r.correct)
-                      .map((result, i) => (
-                        <li key={i} className="text-sm">
-                          {result.word}
-                        </li>
-                      ))}
-                  </ul>
+          <div className="space-y-4">
+            <Card className="p-4">
+              <div className="text-lg font-medium mb-2">Results</div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <h3 className="font-medium text-primary mb-2">Guessed Words</h3>
+                  <div className="overflow-y-auto" style={{ maxHeight: 'calc(60vh - 20rem)' }}>
+                    <ul className="space-y-1">
+                      {[...results]
+                        .reverse()
+                        .filter((r) => r.correct)
+                        .map((result, i) => (
+                          <li key={i} className="text-sm">
+                            {result.word}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
+                </div>
+                <div className="border-l pl-4">
+                  <h3 className="font-medium text-destructive mb-2">
+                    Skipped Words
+                  </h3>
+                  <div className="overflow-y-auto" style={{ maxHeight: 'calc(60vh - 20rem)' }}>
+                    <ul className="space-y-1">
+                      {[...results]
+                        .reverse()
+                        .filter((r) => !r.correct)
+                        .map((result, i) => (
+                          <li key={i} className="text-sm text-muted-foreground">
+                            {result.word}
+                          </li>
+                        ))}
+                    </ul>
+                  </div>
                 </div>
               </div>
-              <div className="border-l pl-4">
-                <h3 className="font-medium text-destructive mb-2">
-                  Skipped Words
-                </h3>
-                <div className="overflow-y-auto" style={{ maxHeight: 'calc(60vh - 20rem)' }}>
-                  <ul className="space-y-1">
-                    {[...results]
-                      .reverse()
-                      .filter((r) => !r.correct)
-                      .map((result, i) => (
-                        <li key={i} className="text-sm text-muted-foreground">
-                          {result.word}
-                        </li>
-                      ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 space-y-4 p-4 bg-background/80 backdrop-blur-sm border-t">
+      <div className="bottom-area">
         <Card className="p-4 mb-4">
           <div className="text-lg font-medium">
             Current Score: {getCurrentScore()}

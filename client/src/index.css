@@ -41,8 +41,10 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Quicksand', sans-serif;
-    min-height: 100vh;
+    height: 100dvh;
     position: relative;
+    margin: 0;
+    overflow: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -76,6 +78,10 @@
 #root {
   position: relative;
   z-index: 1;
+  height: 100dvh; /* dynamic viewport height */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* Update Card component z-index */
@@ -208,4 +214,28 @@ button,
 .content-layer {
   position: relative;
   z-index: 2;
+}
+
+/* Add container class for main content */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Add scrollable content area */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  padding: 1rem;
+}
+
+/* Update fixed bottom area */
+.bottom-area {
+  flex-shrink: 0;
+  background: var(--background);
+  border-top: 1px solid var(--border);
+  padding: 1rem;
 }

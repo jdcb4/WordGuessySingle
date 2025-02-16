@@ -71,35 +71,38 @@ export default function Summary() {
   };
 
   return (
-    <div className="min-h-screen p-6 bg-gradient-to-b from-background to-primary/5">
+    <div className="app-container">
       <QuitGameDialog />
-      <div className="max-w-md mx-auto space-y-8">
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          className="text-center space-y-2"
-        >
-          <h1 className="text-4xl font-bold">Game Over!</h1>
-          {winners.length === 1 ? (
-            <p className="text-xl text-primary">
-              {winners[0].name} wins with {winners[0].score} points!
-            </p>
-          ) : (
-            <p className="text-xl text-primary">
-              It's a tie! {winners.map(w => w.name).join(" & ")} win with {maxScore} points!
-            </p>
-          )}
-        </motion.div>
+      
+      <div className="content-area">
+        <div className="max-w-md mx-auto space-y-8">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="text-center space-y-2"
+          >
+            <h1 className="text-4xl font-bold">Game Over!</h1>
+            {winners.length === 1 ? (
+              <p className="text-xl text-primary">
+                {winners[0].name} wins with {winners[0].score} points!
+              </p>
+            ) : (
+              <p className="text-xl text-primary">
+                It's a tie! {winners.map(w => w.name).join(" & ")} win with {maxScore} points!
+              </p>
+            )}
+          </motion.div>
 
-        <ScoreDisplay teams={teams} />
+          <ScoreDisplay teams={teams} />
 
-        <Button
-          size="lg"
-          className="w-full"
-          onClick={handlePlayAgain}
-        >
-          Play Again
-        </Button>
+          <Button
+            size="lg"
+            className="w-full"
+            onClick={handlePlayAgain}
+          >
+            Play Again
+          </Button>
+        </div>
       </div>
     </div>
   );

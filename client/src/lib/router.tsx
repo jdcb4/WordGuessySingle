@@ -1,33 +1,33 @@
-import { Router, Route } from "wouter";
+import { Router } from "wouter";
 import { useState, useEffect } from "react";
 
-// Custom hook to handle base path
-function useBasePath() {
-  return '/WordGuessySingle'; // Match your vite.config.ts base
-}
-
 // Custom hook for hash-based routing
-function useHashLocation() {
-  const [location, setLocation] = useState(window.location.hash.replace('#', '') || '/');
-  const base = useBasePath();
+const useHashLocation = () => {
+  const [loc, setLoc] = useState(window.location.hash.slice(1) || "/");
 
   useEffect(() => {
-    // Handle hash changes
-    const handleHashChange = () => {
-      const hash = window.location.hash.replace('#', '') || '/';
-      setLocation(hash);
+    const handler = () => {
+      const hash = window.location.hash.slice(1) || "/";
+      setLoc(hash);
     };
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    // Listen to hash changes
+    window.addEventListener("hashchange", handler);
+    // Listen to initial load
+    window.addEventListener("load", handler);
+
+    return () => {
+      window.removeEventListener("hashchange", handler);
+      window.removeEventListener("load", handler);
+    };
   }, []);
 
   const navigate = (to: string) => {
     window.location.hash = to;
   };
 
-  return [location, navigate];
-}
+  return [loc, navigate] as const;
+};
 
 export function AppRouter({ children }: { children: React.ReactNode }) {
   return (

@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 import { useGameStore } from "@/lib/use-game-store";
+import { X } from "lucide-react";
 
 export function QuitGameDialog() {
   const [, navigate] = useLocation();
@@ -19,14 +20,19 @@ export function QuitGameDialog() {
 
   const handleQuit = () => {
     reset();
-    window.location.hash = '/';
+    navigate("/");
   };
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="absolute top-4 left-4">
-          Quit Game
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute top-4 right-4 rounded-full hover:bg-destructive/10 hover:text-destructive"
+        >
+          <X className="h-4 w-4" />
+          <span className="sr-only">Quit Game</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
