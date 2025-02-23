@@ -85,9 +85,13 @@ export default function Game() {
       navigate("/");
       return;
     }
-    setCurrentWord(
-      getRandomWord(currentCategory, includedDifficulties, usedWords),
-    );
+    
+    const loadInitialWord = async () => {
+      const initialWord = await getRandomWord(currentCategory, includedDifficulties, usedWords);
+      setCurrentWord(initialWord);
+    };
+    
+    loadInitialWord();
   }, []);
 
   // Update the countdown sound effect
@@ -131,8 +135,7 @@ export default function Game() {
     return Math.max(0, correctWords.length - Math.max(0, skipsUsed - 1));
   };
 
-  const handleNext = () => {
-    console.log('Playing correct sound, loaded:', soundsLoaded);
+  const handleNext = async () => {
     if (soundsLoaded) {
       try {
         playCorrectSound();
@@ -145,13 +148,11 @@ export default function Game() {
       ...results,
       { word: currentWord, category: currentCategory, correct: true },
     ]);
-    setCurrentWord(
-      getRandomWord(currentCategory, includedDifficulties, usedWords),
-    );
+    const newWord = await getRandomWord(currentCategory, includedDifficulties, usedWords);
+    setCurrentWord(newWord);
   };
 
-  const handleSkip = () => {
-    console.log('Playing skip sound, loaded:', soundsLoaded);
+  const handleSkip = async () => {
     if (soundsLoaded) {
       try {
         playSkipSound();
@@ -165,9 +166,8 @@ export default function Game() {
       { word: currentWord, category: currentCategory, correct: false },
     ]);
     setSkipsUsed(skipsUsed + 1);
-    setCurrentWord(
-      getRandomWord(currentCategory, includedDifficulties, usedWords),
-    );
+    const newWord = await getRandomWord(currentCategory, includedDifficulties, usedWords);
+    setCurrentWord(newWord);
   };
 
   const handleTurnEnd = () => {
@@ -198,11 +198,12 @@ export default function Game() {
     }
   };
 
-  const handleStartTurn = () => {
+  const handleStartTurn = async () => {
     if (!timer.isActive) {
       setResults([]);
       setSkipsUsed(0);
-      setCurrentWord(getRandomWord(currentCategory, includedDifficulties, usedWords));
+      const newWord = await getRandomWord(currentCategory, includedDifficulties, usedWords);
+      setCurrentWord(newWord);
       timer.start();
     }
   };

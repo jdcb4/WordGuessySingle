@@ -1,5 +1,5 @@
 import { Category, Difficulty } from "@shared/schema";
-import wordsData from "../../../attached_assets/words.json";
+import Papa from 'papaparse';
 
 type WordData = {
   category: string;
@@ -17,19 +17,61 @@ const wordsByCategory: Record<Category, WordData[]> = {
   "Entertainment": []
 };
 
-// Populate categories from JSON data
-(wordsData as WordData[]).forEach((item: WordData) => {
-  const category = item.category as Category;
-  if (wordsByCategory[category]) {
-    wordsByCategory[category].push(item);
+// Function to load and parse CSV data
+const loadWordsFromCSV = async () => {
+  try {
+    const response = await fetch('/WordGuessySingle/words.csv');
+    const csvText = await response.text();
+    
+    return new Promise<WordData[]>((resolve, reject) => {
+      Papa.parse(csvText, {
+        header: true,
+        complete: (results) => {
+          const words = results.data as WordData[];
+          resolve(words);
+        },
+        error: (error) => {
+          reject(error);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error loading words:', error);
+    return [];
   }
-});
+};
 
-export const getRandomWord = (
+// Initialize words data
+let isInitialized = false;
+
+const initializeWords = async () => {
+  if (isInitialized) return;
+  
+  const words = await loadWordsFromCSV();
+  
+  // Reset categories
+  Object.keys(wordsByCategory).forEach(category => {
+    wordsByCategory[category as Category] = [];
+  });
+  
+  // Populate categories
+  words.forEach(word => {
+    if (word.category in wordsByCategory) {
+      wordsByCategory[word.category as Category].push(word);
+    }
+  });
+  
+  isInitialized = true;
+};
+
+// Modified getRandomWord to handle async initialization
+export const getRandomWord = async (
   category: Category,
   includedDifficulties: string[],
   usedWords: Set<string>
-): string => {
+): Promise<string> => {
+  await initializeWords();
+  
   const availableWords = wordsByCategory[category]
     .filter(word => !usedWords.has(word.word) && includedDifficulties.includes(word.difficulty))
     .map(word => word.word);
