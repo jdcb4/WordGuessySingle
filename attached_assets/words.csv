@@ -2386,9 +2386,6 @@ ham hock,Food & Drink,medium
 pepper steak,Food & Drink,medium
 pork belly,Food & Drink,medium
 crispy chicken,Food & Drink,medium
-batter-fried fish,Food & Drink,medium
-mussels marinara,Food & Drink,medium
-grilled shrimp skewer,Food & Drink,medium
 tartare,Food & Drink,hard
 sukiyaki beef,Food & Drink,hard
 wagyu,Food & Drink,hard
@@ -2477,7 +2474,6 @@ frozen yogurt,Food & Drink,medium
 buttermilk pancake,Food & Drink,medium
 ricotta toast,Food & Drink,medium
 yogurt smoothie,Food & Drink,medium
-cheddar cheese soup,Food & Drink,medium
 custard tart,Food & Drink,medium
 panna cotta,Food & Drink,medium
 flan,Food & Drink,medium
@@ -2490,14 +2486,12 @@ colby jack,Food & Drink,medium
 Limburger,Food & Drink,medium
 Wensleydale,Food & Drink,medium
 red Leicester,Food & Drink,medium
-egg Benedict,Food & Drink,medium
+eggs Benedict,Food & Drink,medium
 frittata,Food & Drink,medium
 Spanish omelette,Food & Drink,medium
 crustless quiche,Food & Drink,medium
 lemon meringue pie,Food & Drink,medium
 dairy milk chocolate,Food & Drink,medium
-condensed milk fudge,Food & Drink,medium
-evaporated milk cake,Food & Drink,medium
 milk custard,Food & Drink,medium
 paneer tikka,Food & Drink,medium
 malai kofta,Food & Drink,medium
@@ -2512,9 +2506,6 @@ double Gloucester,Food & Drink,medium
 oat milk,Food & Drink,medium
 cashew cheese,Food & Drink,medium
 ricotta gnocchi,Food & Drink,medium
-cottage cheese pancake,Food & Drink,medium
-sour cream coffee cake,Food & Drink,medium
-paneer butter masala,Food & Drink,medium
 goat cheese,Food & Drink,medium
 requeson,Food & Drink,medium
 labneh dip,Food & Drink,medium
@@ -2588,7 +2579,6 @@ rye bread,Food & Drink,medium
 focaccia,Food & Drink,medium
 ciabatta,Food & Drink,medium
 pita pocket,Food & Drink,medium
-whole wheat pasta,Food & Drink,medium
 spaghetti,Food & Drink,medium
 fettuccine,Food & Drink,medium
 linguine,Food & Drink,medium
@@ -2751,16 +2741,12 @@ cherry clafoutis,Food & Drink,medium
 almond biscotti,Food & Drink,medium
 walnut brownies,Food & Drink,medium
 pecan pie,Food & Drink,medium
-double chocolate cake,Food & Drink,medium
-vanilla pudding,Food & Drink,medium
 butterscotch pudding,Food & Drink,medium
 marshmallow fluff,Food & Drink,medium
-caramel apple pie,Food & Drink,medium
 blueberry cheesecake,Food & Drink,medium
 pumpkin pie,Food & Drink,medium
 blackberry cobbler,Food & Drink,medium
 coconut macaroons,Food & Drink,medium
-profiterole eclair,Food & Drink,medium
 matcha ice cream,Food & Drink,medium
 rice cake,Food & Drink,medium
 baked custard,Food & Drink,medium
@@ -2768,7 +2754,6 @@ mango sticky rice,Food & Drink,medium
 banana pudding,Food & Drink,medium
 chocolate souffle,Food & Drink,medium
 fruit tartlet,Food & Drink,medium
-mini eclair,Food & Drink,medium
 kouign-amann,Food & Drink,hard
 baba au rhum,Food & Drink,hard
 mille-feuille,Food & Drink,hard
@@ -2806,7 +2791,6 @@ water,Food & Drink,easy
 lemonade,Food & Drink,easy
 orange juice,Food & Drink,easy
 apple juice,Food & Drink,easy
-grape juice,Food & Drink,easy
 cranberry juice,Food & Drink,easy
 tomato juice,Food & Drink,easy
 iced tea,Food & Drink,easy
@@ -2830,12 +2814,8 @@ virgin cocktail,Food & Drink,easy
 hot cider,Food & Drink,easy
 iced lemonade,Food & Drink,easy
 milk,Food & Drink,easy
-detox water,Food & Drink,easy
 strawberry milk,Food & Drink,easy
-malt drink,Food & Drink,easy
 sparkling lemonade,Food & Drink,easy
-iced green tea,Food & Drink,medium
-iced black tea,Food & Drink,medium
 chai latte,Food & Drink,medium
 matcha latte,Food & Drink,medium
 vanilla latte,Food & Drink,medium
@@ -2843,70 +2823,31 @@ caramel macchiato,Food & Drink,medium
 fruit soda,Food & Drink,medium
 lemon-lime soda,Food & Drink,medium
 ginger beer,Food & Drink,medium
-cucumber lemonade,Food & Drink,medium
 mango smoothie,Food & Drink,medium
 strawberry smoothie,Food & Drink,medium
 blueberry smoothie,Food & Drink,medium
 kiwi juice,Food & Drink,medium
 pomegranate juice,Food & Drink,medium
-peach iced tea,Food & Drink,medium
-iced herbal infusion,Food & Drink,medium
-berry lemonade,Food & Drink,medium
-citrus punch,Food & Drink,medium
-raspberry iced tea,Food & Drink,medium
 mint lemonade,Food & Drink,medium
 coconut smoothie,Food & Drink,medium
-non-alcoholic cider,Food & Drink,medium
 virgin mojito,Food & Drink,medium
-virgin pi?ña colada,Food & Drink,medium
-virgin daiquiri,Food & Drink,medium
 lemonade slushie,Food & Drink,medium
-frozen smoothie,Food & Drink,medium
 berry frappe,Food & Drink,medium
 iced cappuccino,Food & Drink,medium
 iced mocha,Food & Drink,medium
 chocolate smoothie,Food & Drink,medium
-avocado smoothie,Food & Drink,medium
-kiwi smoothie,Food & Drink,medium
 mango lassi,Food & Drink,medium
 horchata,Food & Drink,medium
-iced matcha,Food & Drink,medium
-herbal infusion,Food & Drink,medium
-peach tea,Food & Drink,medium
 apricot nectar,Food & Drink,medium
 guava juice,Food & Drink,medium
-non-alcoholic sangria,Food & Drink,medium
-sparkling grape juice,Food & Drink,medium
 pear juice,Food & Drink,medium
-limeade,Food & Drink,medium
 raspberry lemonade,Food & Drink,medium
 tropical punch,Food & Drink,medium
-iced fruit tea,Food & Drink,medium
-iced herbal tea,Food & Drink,medium
-iced chai,Food & Drink,medium
 spiced apple cider,Food & Drink,medium
-berry iced tea,Food & Drink,medium
 pineapple juice,Food & Drink,medium
-pomegranate smoothie,Food & Drink,medium
 frozen lemonade,Food & Drink,medium
-iced berry smoothie,Food & Drink,medium
 orangeade,Food & Drink,medium
-herbal iced tea,Food & Drink,medium
-lemon iced tea,Food & Drink,medium
-strawberry iced tea,Food & Drink,medium
-peach smoothie,Food & Drink,medium
-non-dairy milkshake,Food & Drink,medium
-almond milk smoothie,Food & Drink,medium
-soy milk latte,Food & Drink,medium
 oat milk latte,Food & Drink,medium
-iced pomegranate soda,Food & Drink,medium
-sparkling cucumber water,Food & Drink,medium
-freshly squeezed limeade,Food & Drink,medium
-hibiscus lemonade,Food & Drink,medium
-ginger peach iced tea,Food & Drink,medium
-iced herbal lemonade,Food & Drink,medium
-tropical mango agua fresca,Food & Drink,medium
-frosted berry slush,Food & Drink,medium
 dandelion tea,Food & Drink,hard
 hibiscus tea,Food & Drink,hard
 turmeric latte,Food & Drink,hard
@@ -2969,7 +2910,6 @@ scotch,Food & Drink,easy
 bourbon,Food & Drink,easy
 mimosa,Food & Drink,easy
 daiquiri,Food & Drink,easy
-pi?ña colada,Food & Drink,easy
 cosmopolitan,Food & Drink,easy
 bloody mary,Food & Drink,easy
 screwdriver,Food & Drink,easy
@@ -3134,26 +3074,17 @@ chicken satay,Food & Drink,medium
 kebab skewer,Food & Drink,medium
 falafel,Food & Drink,medium
 arancini,Food & Drink,medium
-stuffed jalape?ños,Food & Drink,medium
 buffalo wings,Food & Drink,medium
 potato croquettes,Food & Drink,medium
 cheese danishes,Food & Drink,medium
-mini tacos,Food & Drink,medium
 taquitos,Food & Drink,medium
-mini burritos,Food & Drink,medium
-crab rangoon,Food & Drink,medium
 vegetable spring rolls,Food & Drink,medium
-edamame hummus,Food & Drink,medium
 pretzel bites,Food & Drink,medium
 garlic bread,Food & Drink,medium
-cheese garlic bread,Food & Drink,medium
-baked spinach dip,Food & Drink,medium
 loaded nachos,Food & Drink,medium
 chili cheese fries,Food & Drink,medium
-onion rings with dip,Food & Drink,medium
 barbecue wings,Food & Drink,medium
 chicken quesadilla,Food & Drink,medium
-mini samosas,Food & Drink,medium
 stuffed peppers,Food & Drink,medium
 crostini,Food & Drink,medium
 marinated olives,Food & Drink,medium
@@ -3165,8 +3096,6 @@ stuffed zucchini boats,Food & Drink,medium
 fried green tomatoes,Food & Drink,medium
 spinach dip,Food & Drink,medium
 avocado toast,Food & Drink,medium
-mini corn dogs,Food & Drink,medium
-tempura tofu,Food & Drink,medium
 falafel wrap,Food & Drink,medium
 nacho cheese dip,Food & Drink,medium
 potato fritters,Food & Drink,medium
@@ -3262,22 +3191,17 @@ barbecue glaze,Food & Drink,medium
 garlic aioli,Food & Drink,medium
 cranberry sauce,Food & Drink,medium
 mustard sauce,Food & Drink,medium
-dill pickle relish,Food & Drink,medium
 caper sauce,Food & Drink,medium
-sun-dried tomato pesto,Food & Drink,medium
 balsamic glaze,Food & Drink,medium
 teriyaki glaze,Food & Drink,medium
 ginger sauce,Food & Drink,medium
 miso glaze,Food & Drink,medium
 hoisin glaze,Food & Drink,medium
 sweet chili sauce,Food & Drink,medium
-garlic butter sauce,Food & Drink,medium
-white barbecue sauce,Food & Drink,medium
 chimichurri sauce,Food & Drink,medium
 lemon herb dressing,Food & Drink,medium
 red wine vinaigrette,Food & Drink,medium
 blue cheese dressing,Food & Drink,medium
-creamy Italian dressing,Food & Drink,medium
 sesame oil,Food & Drink,medium
 brown mustard,Food & Drink,medium
 Dijon mustard,Food & Drink,medium
@@ -3289,12 +3213,9 @@ truffle oil,Food & Drink,medium
 za'atar,Food & Drink,medium
 sumac,Food & Drink,medium
 curry paste,Food & Drink,medium
-tomato jam,Food & Drink,medium
 sweet and sour sauce,Food & Drink,medium
 peri peri sauce,Food & Drink,medium
 tamarind sauce,Food & Drink,medium
-garlic chutney,Food & Drink,medium
-spicy brown mustard,Food & Drink,medium
 adobo sauce,Food & Drink,medium
 roux,Food & Drink,medium
 mole poblano,Food & Drink,medium
@@ -3502,73 +3423,27 @@ crispy fish fillet sandwich,Food & Drink,easy
 double decker sub,Food & Drink,easy
 spicy beef slider,Food & Drink,easy
 crispy chicken wrap,Food & Drink,easy
-grilled chicken sub,Food & Drink,easy
-Triple-decker club sandwich,Food & Drink,medium
-Grilled veggie panini,Food & Drink,medium
 BBQ brisket sandwich,Food & Drink,medium
 Pulled jackfruit taco,Food & Drink,medium
 Crispy tofu burger,Food & Drink,medium
 Truffle parmesan fries,Food & Drink,medium
-Pesto chicken panini,Food & Drink,medium
-Roasted garlic flatbread,Food & Drink,medium
 Korean BBQ taco,Food & Drink,medium
 Crispy duck bao,Food & Drink,medium
 Pork belly bao,Food & Drink,medium
 Fried wonton appetizer,Food & Drink,medium
 Sriracha slaw sandwich,Food & Drink,medium
 Loaded nacho fries,Food & Drink,medium
-Tempura avocado tacos,Food & Drink,medium
 Black bean burger,Food & Drink,medium
 Caramelized onion tartine,Food & Drink,medium
 Mushroom melt sandwich,Food & Drink,medium
-BBQ chicken flatbread,Food & Drink,medium
 Crispy fish roll,Food & Drink,medium
-Tempura soft-shell crab roll,Food & Drink,medium
 Spiced lamb pita,Food & Drink,medium
-Smoky pulled chicken taco,Food & Drink,medium
-Chimichurri steak wrap,Food & Drink,medium
-Herb-crusted turkey burger,Food & Drink,medium
-Roasted red pepper panini,Food & Drink,medium
-Baked mac and cheese bites,Food & Drink,medium
 Zucchini fritters,Food & Drink,medium
 Fried cauliflower bites,Food & Drink,medium
 Buffalo cauliflower wrap,Food & Drink,medium
-Sweet and spicy meatball sub,Food & Drink,medium
-Smashed chickpea sandwich,Food & Drink,medium
-Spicy roasted chickpea burger,Food & Drink,medium
-Grilled portobello sandwich,Food & Drink,medium
-Crispy eggplant parm sandwich,Food & Drink,medium
-Marinated artichoke panini,Food & Drink,medium
-Coconut curry veggie wrap,Food & Drink,medium
-Quinoa and black bean burger,Food & Drink,medium
-Smoky chipotle veggie burger,Food & Drink,medium
-Truffle mushroom risotto cake,Food & Drink,medium
-Cheddar bacon tater tot casserole,Food & Drink,medium
-Sriracha glazed pork belly bun,Food & Drink,medium
 Crispy seaweed taco,Food & Drink,medium
 Eggplant slider,Food & Drink,medium
-Caramelized fig and prosciutto panini,Food & Drink,medium
-Spicy mango chicken wrap,Food & Drink,medium
-Maple-glazed turkey sub,Food & Drink,medium
-Roasted corn and black bean burrito,Food & Drink,medium
-Grilled shrimp po' boy with remoulade,Food & Drink,medium
 Spicy sirloin wrap,Food & Drink,medium
-Veggie stir-fry rice bowl,Food & Drink,medium
-BBQ pulled pork mac sandwich,Food & Drink,medium
-Crispy bacon egg waffle,Food & Drink,medium
-Garlic butter lobster roll,Food & Drink,medium
-Spicy chorizo empanada,Food & Drink,medium
-Crisp parmesan zucchini chips,Food & Drink,medium
-Smoked turkey cranberry wrap,Food & Drink,medium
-Sweet chili glazed chicken drumstick,Food & Drink,medium
-Crispy rice shrimp cakes,Food & Drink,medium
-Spiced curried lentil wrap,Food & Drink,medium
-Grilled lamb kofta sub,Food & Drink,medium
-Tangy lemon herb chicken sub,Food & Drink,medium
-Roasted chicken slider,Food & Drink,medium
-Crispy coconut shrimp wrap,Food & Drink,medium
-Smashed avocado and bacon toast,Food & Drink,medium
-Hot and spicy ramen burger,Food & Drink,medium
 Artisanal bialy slider,Food & Drink,hard
 Truffle-infused po' boy,Food & Drink,hard
 Pumpernickel Reuben sandwich,Food & Drink,hard
@@ -3648,7 +3523,6 @@ Cuban coffee,Food & Drink,medium
 espresso con panna,Food & Drink,medium
 iced mocha,Food & Drink,medium
 caramel macchiato,Food & Drink,medium
-affogato al caff??,Food & Drink,medium
 iced americano,Food & Drink,medium
 double espresso,Food & Drink,medium
 breve,Food & Drink,medium
@@ -3682,21 +3556,12 @@ iced tea cooler,Food & Drink,medium
 coffee frappe,Food & Drink,medium
 single origin coffee,Food & Drink,medium
 artisan coffee,Food & Drink,medium
-Japanese iced coffee,Food & Drink,medium
-Kyoto-style coffee,Food & Drink,medium
 cold drip coffee,Food & Drink,medium
-iced red velvet latte,Food & Drink,medium
-honey lavender latte,Food & Drink,medium
-salted caramel latte,Food & Drink,medium
 ginger tea,Food & Drink,medium
 turmeric tea,Food & Drink,medium
 barley tea,Food & Drink,medium
 lemon ginger tea,Food & Drink,medium
-iced herbal infusion,Food & Drink,medium
-iced green tea lemonade,Food & Drink,medium
 sweet tea,Food & Drink,medium
-spiced apple cider tea,Food & Drink,medium
-iced peppermint mocha,Food & Drink,medium
 honey iced tea,Food & Drink,medium
 cortadito,Food & Drink,hard
 cafe de olla,Food & Drink,hard
@@ -12608,7 +12473,6 @@ stracciatella,Food & Drink,Medium
 biscotti,Food & Drink,Medium
 macaroon,Food & Drink,Medium
 madeleine,Food & Drink,Medium
-souffl??,Food & Drink,Medium
 quindim,Food & Drink,Medium
 brigadeiro,Food & Drink,Medium
 flan,Food & Drink,Medium
@@ -12670,7 +12534,6 @@ banh xeo,Food & Drink,Medium
 com tam,Food & Drink,Medium
 cao lau,Food & Drink,Medium
 mi quang,Food & Drink,Medium
-x??i,Food & Drink,Medium
 durian,Food & Drink,Medium
 rambutan,Food & Drink,Medium
 mangosteen,Food & Drink,Medium
