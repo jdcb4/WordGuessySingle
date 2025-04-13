@@ -32,17 +32,12 @@ export const CATEGORIES = [
   "Things",
   "Places",
   "Food & Drink",
-  "Hobbies",
   "Entertainment"
 ] as const;
 
-export const DIFFICULTIES = [
-  "Easy",
-  "Medium",
-  "Hard"
-] as const;
+export const DIFFICULTIES = ['Easy', 'Medium'];
 
-export const TURN_DURATIONS = [5, 15, 30, 45] as const;
+export const TURN_DURATIONS = [15, 30, 45, 60] as const;
 export const ROUND_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export type Difficulty = typeof DIFFICULTIES[number];

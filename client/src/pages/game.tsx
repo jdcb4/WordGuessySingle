@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useLocation } from "wouter";
 import { useGameStore } from "@/lib/use-game-store";
 import { useTimer } from "@/lib/use-timer";
@@ -6,7 +6,7 @@ import { TimerDisplay } from "@/components/timer-display";
 import { WordDisplay } from "@/components/word-display";
 import { ScoreDisplay } from "@/components/score-display";
 import { getRandomWord, getRandomCategory } from "@/lib/game-data";
-import { WordResult, Category } from "@shared/schema";
+import { Category } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import useSound from "use-sound";
@@ -14,6 +14,17 @@ import { QuitGameDialog } from "@/components/quit-game-dialog";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useTensionSound } from "@/lib/use-tension-sound";
+
+// Define WordData locally if not in shared schema
+type CurrentWordData = { word: string; hint: string } | null;
+
+// Rename the local type if it conflicts with an import
+type TurnWordResult = {
+  word: string;
+  category: string;
+  correct: boolean;
+  hint?: string;
+};
 
 export default function Game() {
   const [, navigate] = useLocation();
@@ -30,14 +41,23 @@ export default function Game() {
     totalRounds,
   } = useGameStore();
 
+  // Select freeSkips and freeHints explicitly
+  const freeSkips = useGameStore(state => state.freeSkips);
+  const freeHints = useGameStore(state => state.freeHints);
+
+  // Add a log to verify the selected values immediately
+  console.log(`Selected values - freeSkips: ${freeSkips}, freeHints: ${freeHints}`);
+
   const [currentCategory, setCurrentCategory] = useState<Category>(
     getRandomCategory(includedCategories),
   );
-  const [usedWords] = useState<Set<string>>(new Set());
-  const [currentWord, setCurrentWord] = useState("");
-  const [results, setResults] = useState<WordResult[]>([]);
+  const [currentWordData, setCurrentWordData] = useState<CurrentWordData>(null);
+  const usedWords = useRef(new Set<string>());
+  const [results, setResults] = useState<TurnWordResult[]>([]);
   const [skipsUsed, setSkipsUsed] = useState(0);
   const [soundsLoaded, setSoundsLoaded] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [hintsUsed, setHintsUsed] = useState(0);
 
   const timer = useTimer(turnDuration);
   const [playTimerSound] = useSound("countdown.mp3", { 
@@ -80,37 +100,25 @@ export default function Game() {
     console.log('Sound loaded state:', soundsLoaded);
   }, [soundsLoaded]);
 
+  // Function to get next word
+  const getNextWord = async () => {
+    const newWordData = await getRandomWord(currentCategory, includedDifficulties, usedWords.current);
+    if (newWordData) {
+      setCurrentWordData(newWordData);
+    } else {
+      // Handle case where no words are left for the category/difficulty
+      setCurrentWordData({ word: "NO MORE WORDS", hint: "" }); 
+    }
+  };
+
+  // Initial load
   useEffect(() => {
     if (!teams.length) {
       navigate("/");
       return;
     }
-    
-    const loadInitialWord = async () => {
-      const initialWord = await getRandomWord(currentCategory, includedDifficulties, usedWords);
-      setCurrentWord(initialWord);
-    };
-    
-    loadInitialWord();
+    getNextWord(); // Load initial word
   }, []);
-
-  // Update the countdown sound effect
-  // useEffect(() => {
-  //   if (
-  //     timer.isActive && 
-  //     !timer.isFinished && 
-  //     soundsLoaded && 
-  //     timer.timeLeft === 5 && // Exactly at 5 seconds
-  //     !hasPlayedCountdown     // Haven't played it yet this turn
-  //   ) {
-  //     try {
-  //       playTimerSound();
-  //       setHasPlayedCountdown(true);  // Mark as played for this turn
-  //     } catch (error) {
-  //       console.error("Error playing timer sound:", error);
-  //     }
-  //   }
-  // }, [timer.isActive, timer.isFinished, soundsLoaded, timer.timeLeft, playTimerSound, hasPlayedCountdown]);
 
   // Reset hasPlayedCountdown when starting a new turn
   useEffect(() => {
@@ -121,21 +129,72 @@ export default function Game() {
 
   // Add this effect to handle the final word when timer finishes
   useEffect(() => {
-    if (timer.isFinished && currentWord) {
+    if (timer.isFinished && currentWordData) {
       setResults(prev => [
         ...prev,
-        { word: currentWord, category: currentCategory, correct: false }
+        { word: currentWordData.word, category: currentCategory, correct: false, hint: currentWordData.hint }
       ]);
     }
   }, [timer.isFinished]);
 
+  useEffect(() => {
+    console.log('[Game useEffect] Values from store:', { freeSkips, freeHints });
+    // If they are initially undefined, this effect will run again if/when they change.
+  }, [freeSkips, freeHints]); // Depend specifically on these values
+
   const getCurrentScore = () => {
-    const correctWords = results.filter((r) => r.correct);
-    // Use Math.max to ensure the score doesn't go below 0
-    return Math.max(0, correctWords.length - Math.max(0, skipsUsed - 1));
+    const correctWords = results.filter((r) => r.correct).length;
+    let skipPenalty = 0;
+
+    // Log the values being used in the calculation
+    console.log(`Calculating score - correctWords: ${correctWords}, skipsUsed: ${skipsUsed}, freeSkips from store: ${freeSkips}`);
+
+    // Ensure freeSkips is a valid number before using it
+    const numFreeSkips = typeof freeSkips === 'number' && !isNaN(freeSkips) ? freeSkips : 1; // Default to 1 if invalid
+
+    if (numFreeSkips === -1) {
+      // Unlimited skips means no penalty
+      skipPenalty = 0;
+      console.log("Unlimited free skips, penalty = 0");
+    } else {
+      skipPenalty = Math.max(0, skipsUsed - numFreeSkips);
+      console.log(`Calculated penalty: max(0, ${skipsUsed} - ${numFreeSkips}) = ${skipPenalty}`);
+    }
+
+    // Final score cannot be negative
+    const finalScore = Math.max(0, correctWords - skipPenalty);
+
+    // Check if the result is NaN and return 0 if it is
+    if (isNaN(finalScore)) {
+      console.error("Score calculation resulted in NaN. Values:", { correctWords, skipsUsed, freeSkips, numFreeSkips, skipPenalty });
+      return 0;
+    }
+
+    console.log(`Final score: max(0, ${correctWords} - ${skipPenalty}) = ${finalScore}`);
+    return finalScore;
   };
 
+  // Calculate if hints are available
+  console.log(`[Game Render] Values before hintsAvailable calc: freeHints=${freeHints}, hintsUsed=${hintsUsed}`);
+  const hintsAvailable = freeHints === -1 || hintsUsed < freeHints;
+  console.log(`Hints check - freeHints: ${freeHints}, hintsUsed: ${hintsUsed}, hintsAvailable: ${hintsAvailable}`);
+
+  // Reset hintsUsed when turn starts
+  const handleStartTurn = () => {
+    if (!timer.isActive) {
+      setResults([]);
+      setSkipsUsed(0);
+      setHintsUsed(0);
+      usedWords.current.clear();
+      getNextWord();
+      timer.start();
+    }
+  };
+
+  // Update handleNext
   const handleNext = async () => {
+    if (isTransitioning || !currentWordData || currentWordData.word === "NO MORE WORDS") return;
+
     if (soundsLoaded) {
       try {
         playCorrectSound();
@@ -143,16 +202,24 @@ export default function Game() {
         console.error("Error playing correct sound:", error);
       }
     }
-    usedWords.add(currentWord);
-    setResults([
-      ...results,
-      { word: currentWord, category: currentCategory, correct: true },
+
+    usedWords.current.add(currentWordData.word);
+    setResults(prev => [
+      ...prev,
+      {
+        word: currentWordData.word,
+        category: currentCategory,
+        correct: true,
+        hint: currentWordData.hint // Store hint in results
+      }
     ]);
-    const newWord = await getRandomWord(currentCategory, includedDifficulties, usedWords);
-    setCurrentWord(newWord);
+    await getNextWord();
   };
 
+  // Update handleSkip
   const handleSkip = async () => {
+    if (isTransitioning || !currentWordData || currentWordData.word === "NO MORE WORDS") return;
+
     if (soundsLoaded) {
       try {
         playSkipSound();
@@ -160,17 +227,27 @@ export default function Game() {
         console.error("Error playing skip sound:", error);
       }
     }
-    usedWords.add(currentWord);
-    setResults([
-      ...results,
-      { word: currentWord, category: currentCategory, correct: false },
+
+    usedWords.current.add(currentWordData.word);
+    setResults(prev => [
+      ...prev,
+      {
+        word: currentWordData.word,
+        category: currentCategory,
+        correct: false,
+        hint: currentWordData.hint // Store hint in results
+      }
     ]);
-    setSkipsUsed(skipsUsed + 1);
-    const newWord = await getRandomWord(currentCategory, includedDifficulties, usedWords);
-    setCurrentWord(newWord);
+    setSkipsUsed(prev => prev + 1);
+    await getNextWord();
   };
 
+  // Reset hintsUsed when turn ends
   const handleTurnEnd = () => {
+    if (isTransitioning) return;
+
+    setIsTransitioning(true);
+    const finalScore = getCurrentScore();
     const team = teams[currentTeamIndex];
     const isLastRound = currentRound === totalRounds;
     const isLastTeam = currentTeamIndex === teams.length - 1;
@@ -178,33 +255,39 @@ export default function Game() {
 
     addTurnResult({
       teamId: team.id,
-      score: getCurrentScore(),
+      score: finalScore,
       words: results,
     });
 
-    if (shouldEndGame) {
-      navigate("/summary");
-    } else {
-      nextTeam();
-      timer.reset();
-      setResults([]);
-      setSkipsUsed(0);
-      const newCategory = getRandomCategory(includedCategories);
-      setCurrentCategory(newCategory);
-      setCurrentWord(
-        getRandomWord(newCategory, includedDifficulties, new Set()),
-      );
-      usedWords.clear();
-    }
+    setTimeout(() => {
+      if (shouldEndGame) {
+        navigate("/summary");
+      } else {
+        nextTeam();
+        timer.reset();
+        setResults([]);
+        setSkipsUsed(0);
+        setHintsUsed(0);
+        const newCategory = getRandomCategory(includedCategories);
+        setCurrentCategory(newCategory);
+        usedWords.current.clear();
+        getNextWord();
+      }
+      setIsTransitioning(false);
+    }, 1000);
   };
 
-  const handleStartTurn = async () => {
-    if (!timer.isActive) {
-      setResults([]);
-      setSkipsUsed(0);
-      const newWord = await getRandomWord(currentCategory, includedDifficulties, usedWords);
-      setCurrentWord(newWord);
-      timer.start();
+  // Function to handle showing the hint (passed to WordDisplay)
+  const handleShowHint = () => {
+    console.log('handleShowHint called in Game. Current hintsAvailable:', hintsAvailable, 'Current hintsUsed:', hintsUsed);
+    if (hintsAvailable) {
+      setHintsUsed(prev => {
+        const nextHintsUsed = prev + 1;
+        console.log(`Incrementing hintsUsed to: ${nextHintsUsed}`);
+        return nextHintsUsed;
+      });
+    } else {
+      console.log('handleShowHint called but hints not available.');
     }
   };
 
@@ -248,7 +331,7 @@ export default function Game() {
               {/* Add Final Word Display */}
               <div className="p-4 bg-muted/50 rounded-lg text-center">
                 <h3 className="font-medium text-muted-foreground mb-1">Final Word</h3>
-                <p className="text-lg font-medium">{currentWord}</p>
+                <p className="text-lg font-medium">{currentWordData?.word === "NO MORE WORDS" ? "N/A" : currentWordData?.word || 'N/A'}</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -301,6 +384,8 @@ export default function Game() {
     );
   }
 
+  // Add logging before rendering WordDisplay
+  console.log('Rendering WordDisplay with hintsAvailable:', hintsAvailable);
   return (
     <div className="app-container">
       <QuitGameDialog />
@@ -310,11 +395,10 @@ export default function Game() {
           <TimerDisplay timeLeft={timer.timeLeft} total={turnDuration} />
 
           <WordDisplay
-            word={currentWord}
+            wordData={currentWordData}
             category={currentCategory}
-            onNext={handleNext}
-            onSkip={handleSkip}
-            disabled={timer.isFinished}
+            hintsAvailable={hintsAvailable}
+            onShowHint={handleShowHint}
           />
 
           <div className="space-y-4">

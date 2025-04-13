@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { GameState, Team, TurnResult } from '@shared/schema';
+import { GameState, Team, TurnResult, WordResult } from '@shared/schema';
 
 interface GameStore extends GameState {
   initializeGame: (
@@ -7,13 +7,15 @@ interface GameStore extends GameState {
     includedCategories: string[],
     turnDuration: number,
     totalRounds: number,
-    includedDifficulties: string[]
+    includedDifficulties: string[],
+    freeSkips: number,
+    freeHints: number
   ) => void;
   updateTeamScore: (teamId: number, points: number) => void;
   nextTeam: () => void;
   nextRound: () => void;
   endGame: () => void;
-  addTurnResult: (result: TurnResult) => void;
+  addTurnResult: (result: { teamId: number; score: number; words: WordResult[] }) => void;
   reset: () => void;
 }
 
@@ -26,22 +28,37 @@ const initialState: GameState = {
   includedDifficulties: ["Easy", "Medium"],
   isGameStarted: false,
   isGameOver: false,
-  turnDuration: 30
+  turnDuration: 30,
+  freeSkips: 1,
+  freeHints: 1
 };
 
 export const useGameStore = create<GameStore>((set, get) => ({
   ...initialState,
 
-  initializeGame: (teams, includedCategories, turnDuration, totalRounds, includedDifficulties) => set({
-    teams,
-    includedCategories,
-    includedDifficulties,
-    turnDuration,
-    totalRounds,
-    isGameStarted: true,
-    currentRound: 1,
-    currentTeamIndex: 0
-  }),
+  initializeGame: (teams, categories, duration, rounds, difficulties, freeSkips, freeHints) => {
+    console.log('[Store] initializeGame received:', { freeSkips, freeHints });
+
+    set({
+      teams: teams.map(t => ({ ...t, score: 0, roundScores: [] })),
+      includedCategories: categories,
+      turnDuration: duration,
+      totalRounds: rounds,
+      currentRound: 1,
+      currentTeamIndex: 0,
+      isGameStarted: true,
+      isGameOver: false,
+      includedDifficulties: difficulties,
+      freeSkips: freeSkips,
+      freeHints: freeHints,
+    });
+
+    const currentState = get();
+    console.log('[Store] State IMMEDIATELY after set in initializeGame:', {
+      freeSkips: currentState.freeSkips,
+      freeHints: currentState.freeHints
+    });
+  },
 
   updateTeamScore: (teamId, points) => set(state => ({
     teams: state.teams.map(team =>
@@ -91,3 +108,17 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   reset: () => set(initialState)
 }));
+
+export type GameState = {
+  teams: Team[];
+  currentRound: number;
+  totalRounds: number;
+  currentTeamIndex: number;
+  includedCategories: string[];
+  includedDifficulties: string[];
+  isGameStarted: boolean;
+  isGameOver: boolean;
+  turnDuration: number;
+  freeSkips: number;
+  freeHints: number;
+};

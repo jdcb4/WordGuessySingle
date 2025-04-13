@@ -7,16 +7,28 @@ import { QuitGameDialog } from "@/components/quit-game-dialog";
 
 export default function Home() {
   const [, navigate] = useLocation();
-  const initializeGame = useGameStore(state => state.initializeGame);
+  const initializeGameAction = useGameStore(state => state.initializeGame);
 
   const handleStart = (
     teams: Team[],
     includedCategories: string[],
     turnDuration: number,
     totalRounds: number,
-    includedDifficulties: string[]
+    includedDifficulties: string[],
+    freeSkips: number,
+    freeHints: number
   ) => {
-    initializeGame(teams, includedCategories, turnDuration, totalRounds, includedDifficulties);
+    console.log('[Home] handleStart received:', { freeSkips, freeHints });
+
+    initializeGameAction(
+      teams,
+      includedCategories,
+      turnDuration,
+      totalRounds,
+      includedDifficulties,
+      freeSkips,
+      freeHints
+    );
     navigate("/game");
   };
 

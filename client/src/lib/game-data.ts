@@ -5,6 +5,7 @@ type WordData = {
   category: string;
   word: string;
   difficulty: string;
+  hint?: string;
 };
 
 // Create a map to store words by category
@@ -44,7 +45,8 @@ const loadWordsFromCSV = async () => {
             const normalized = {
               ...word,
               category: normalizeCategory(word.category),
-              difficulty: word.difficulty?.charAt(0).toUpperCase() + word.difficulty?.slice(1) || 'Easy'
+              difficulty: word.difficulty ? (word.difficulty.charAt(0).toUpperCase() + word.difficulty.slice(1)) : 'Easy',
+              hint: word.hint || ''
             };
             return normalized;
           });
@@ -140,13 +142,13 @@ export const getRandomWord = async (
   category: Category,
   includedDifficulties: string[],
   usedWords: Set<string>
-): Promise<string> => {
+): Promise<{ word: string; hint: string } | null> => {
   await initializeWords();
   
   console.log('Getting random word for:', category, 'Difficulties:', includedDifficulties);
   console.log('Used words count:', usedWords.size);
   
-  const availableWords = wordsByCategory[category]
+  const availableWordObjects = wordsByCategory[category]
     .filter(word => {
       const isAvailable = !usedWords.has(word.word) && 
                          includedDifficulties.includes(word.difficulty);
@@ -157,13 +159,19 @@ export const getRandomWord = async (
         );
       }
       return isAvailable;
-    })
-    .map(word => word.word);
+    });
 
-  console.log('Available words:', availableWords);
+  console.log('Available word objects:', availableWordObjects);
 
-  if (availableWords.length === 0) return "NO MORE WORDS";
-  return availableWords[Math.floor(Math.random() * availableWords.length)];
+  if (availableWordObjects.length === 0) {
+    console.log('No more words available for this category/difficulty.');
+    return null;
+  }
+  
+  const selectedWordObject = availableWordObjects[Math.floor(Math.random() * availableWordObjects.length)];
+  
+  console.log('Selected word object:', selectedWordObject);
+  return { word: selectedWordObject.word, hint: selectedWordObject.hint || '' };
 };
 
 export const getRandomCategory = (includedCategories: string[]): Category => {

@@ -12,11 +12,20 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogAction,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Team, TURN_DURATIONS, CATEGORIES, DIFFICULTIES } from "@shared/schema";
 import { CategorySelect } from "./category-select";
 import { DifficultySelect } from "./difficulty-select";
-import { Info } from "lucide-react";
+import { Info, InfoIcon } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface TeamSetupProps {
   onStart: (
@@ -24,21 +33,43 @@ interface TeamSetupProps {
     includedCategories: string[],
     turnDuration: number,
     totalRounds: number,
-    includedDifficulties: string[]
+    includedDifficulties: string[],
+    freeSkips: number,
+    freeHints: number
   ) => void;
 }
 
 export function TeamSetup({ onStart }: TeamSetupProps) {
   const [teamCount, setTeamCount] = useState(2);
   const [teamNames, setTeamNames] = useState<string[]>(Array(4).fill(""));
-  const [includedCategories, setIncludedCategories] = useState<string[]>([...CATEGORIES]);
-  const [turnDuration, setTurnDuration] = useState<number>(TURN_DURATIONS[2]); // Default to 30 seconds
-  const [totalRounds, setTotalRounds] = useState(3); // Default to 3 rounds
+  const [includedCategories, setIncludedCategories] = useState<string[]>([
+    "Actions",
+    "Things",
+    "Places",
+    "Food & Drink",
+    "Entertainment"
+  ]);
+  const [turnDuration, setTurnDuration] = useState(60);
+  const [totalRounds, setTotalRounds] = useState(3);
   const [includedDifficulties, setIncludedDifficulties] = useState<string[]>(["Easy", "Medium"]);
+  const [freeSkips, setFreeSkips] = useState("1");
+  const [freeHints, setFreeHints] = useState("1");
   const [infoOpen, setInfoOpen] = useState(false);
 
   const handleStart = () => {
     if (includedCategories.length === 0) return;
+
+    const numFreeSkips = freeSkips === "Unlimited" ? -1 : parseInt(freeSkips, 10);
+    const numFreeHints = freeHints === "Unlimited" ? -1 : parseInt(freeHints, 10);
+
+    console.log('[TeamSetup] Calculated Settings:', { numFreeSkips, numFreeHints, freeSkipsState: freeSkips, freeHintsState: freeHints });
+
+    const validNumFreeSkips = isNaN(numFreeSkips) ? 1 : numFreeSkips;
+    const validNumFreeHints = isNaN(numFreeHints) ? 1 : numFreeHints;
+
+    if (isNaN(numFreeSkips) || isNaN(numFreeHints)) {
+        console.error('[TeamSetup] Invalid number parsed for skips/hints. Defaulting to 1.');
+    }
 
     const teams: Team[] = Array.from({ length: teamCount }, (_, i) => ({
       id: i + 1,
@@ -46,7 +77,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
       score: 0,
       roundScores: []
     }));
-    onStart(teams, includedCategories, turnDuration, totalRounds, includedDifficulties);
+    onStart(teams, includedCategories, turnDuration, totalRounds, includedDifficulties, validNumFreeSkips, validNumFreeHints);
   };
 
   return (
@@ -57,7 +88,7 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
         className="absolute top-4 right-4"
         onClick={() => setInfoOpen(true)}
       >
-        <Info className="h-5 w-5" />
+        <InfoIcon className="h-5 w-5" />
       </Button>
 
       <div className="space-y-2">
@@ -104,6 +135,42 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
         </div>
       </div>
 
+      <div className="space-y-2">
+        <Label>Game Settings</Label>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end">
+          <div>
+            <Label htmlFor="free-skips" className="text-sm">Free Skips per Turn</Label>
+            <Select value={freeSkips} onValueChange={setFreeSkips}>
+              <SelectTrigger id="free-skips">
+                <SelectValue placeholder="Select free skips" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">0</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="Unlimited">Unlimited (∞)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="free-hints" className="text-sm">Free Hints per Turn</Label>
+            <Select value={freeHints} onValueChange={setFreeHints}>
+              <SelectTrigger id="free-hints">
+                <SelectValue placeholder="Select free hints" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="0">0</SelectItem>
+                <SelectItem value="1">1</SelectItem>
+                <SelectItem value="2">2</SelectItem>
+                <SelectItem value="3">3</SelectItem>
+                <SelectItem value="Unlimited">Unlimited (∞)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
       <DifficultySelect
         includedDifficulties={includedDifficulties}
         onChange={setIncludedDifficulties}
@@ -131,33 +198,35 @@ export function TeamSetup({ onStart }: TeamSetupProps) {
         onChange={setIncludedCategories}
       />
 
-      <Button
-        size="lg"
-        className="w-full"
-        onClick={handleStart}
-        disabled={includedCategories.length === 0}
-      >
-        Start Game
-      </Button>
+      <div className="flex justify-between items-center">
+        <Button
+          size="lg"
+          className="w-full"
+          onClick={handleStart}
+          disabled={includedCategories.length === 0 || includedDifficulties.length === 0}
+        >
+          Start Game
+        </Button>
+      </div>
 
       <AlertDialog open={infoOpen} onOpenChange={setInfoOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>About WordGuessy</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-4">
-              <div className="text-center">
-                <img 
-                  src="junto.png" 
-                  alt="Junto Logo" 
-                  className="mx-auto w-32 h-32 mb-4"
-                />
-                <p className="text-lg">
-                  A fun word guessing game for teams, created by Junto.
-                </p>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Version 1.0
-                </p>
-              </div>
+            <AlertDialogTitle className="text-center">About WordGuessy</AlertDialogTitle>
+            <div className="text-center">
+              <img 
+                src="junto.png" 
+                alt="Junto Logo" 
+                className="mx-auto w-32 h-32 mb-4"
+              />
+            </div>
+            <AlertDialogDescription className="text-center space-y-2">
+              <p>
+                A fun word guessing game for teams, created by Junto.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Version 1.0
+              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
